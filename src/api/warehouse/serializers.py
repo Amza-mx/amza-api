@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from apps.warehouse.models import Warehouse
+from apps.prep_centers.models import Warehouse
 
 
 class WarehouseSerializer(serializers.ModelSerializer):
