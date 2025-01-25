@@ -3,10 +3,31 @@ from base.models import BaseModel
 
 
 class Product(BaseModel):
-	"""Model to store the products that are going to be sold."""
+	external_id = models.CharField(max_length=50, db_index=True, help_text='ASIN, WooCommerce ID')
+	sku = models.CharField(max_length=50, db_index=True)
+	title = models.CharField(max_length=500)
+	description = models.TextField()
 
-	sku = models.CharField(
-		max_length=50,
-		help_text='Stock Keeping Unit (SKU) is a unique code that you can assign to each product in your inventory.',
-	)
-	product_title = models.CharField(max_length=100)
+	class CategoriesChoices(models.TextChoices):
+		HEALTH_AND_HOUSEHOLD = 'HEALTH AND HOUSEHOLD', 'Health & household'
+		TOYS_AND_GAMES = 'TOYS AND GAMES', 'Toys & Games'
+	category = models.CharField(max_length=40, choices=CategoriesChoices.choices, default=CategoriesChoices.HEALTH_AND_HOUSEHOLD.value)
+
+	def __str__(self):
+		return f"{self.title} ({self.sku}) - {self.external_id}"
+
+	class Meta:
+		verbose_name = 'Product'
+		verbose_name_plural = 'Products'
+
+
+class ProductPrice(BaseModel):
+	product = models.ForeignKey(Product, related_name='prices', on_delete=models.CASCADE)
+	amount = models.DecimalField(max_digits=10, decimal_places=2)
+
+	def __str__(self):
+		return f"{self.product} - ${self.amount}"
+
+	class Meta:
+		verbose_name = 'Product Price'
+		verbose_name_plural = 'Product Prices'
