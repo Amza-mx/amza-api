@@ -44,11 +44,13 @@ THIRD_PARTY_APPS = [
 ]
 
 OWN_APPS = [
-    'apps.orders',
-    'apps.products',
-    'apps.sellers',
-    'apps.warehouse',
     'apps.users',
+    'apps.products',
+    'apps.marketplaces',
+    'apps.prep_centers',
+    'apps.sales_orders',
+    # 'apps.purchases_orders',
+    # 'apps.products_providers',
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + OWN_APPS
