@@ -1,5 +1,5 @@
 from django.contrib import admin
-from apps.purchases_orders.models import PurchaseOrder, PurchaseOrderDetail, PurchaseOrderTracking
+from apps.purchases_orders.models import PurchaseOrder, PurchaseOrderDetail, ShipmentTracking
 
 
 @admin.register(PurchaseOrder)
@@ -8,8 +8,8 @@ class PurchaseOrderAdmin(admin.ModelAdmin):
 
 @admin.register(PurchaseOrderDetail)
 class PurchaseOrderDetailAdmin(admin.ModelAdmin):
-        readonly_fields = ['total_amount']
+        readonly_fields = ['total_price']
 
-@admin.register(PurchaseOrderTracking)
+@admin.register(ShipmentTracking)
 class PurchaseOrderTrackingAdmin(admin.ModelAdmin):
     pass
