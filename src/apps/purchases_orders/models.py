@@ -2,6 +2,7 @@ from apps.products.models import Product
 from django.db.models.fields.generated import GeneratedField
 from django.db import models
 from django.db.models import F
+from djmoney.models.fields import MoneyField
 from base.models import BaseModel
 from base.choices import PurchaseOrderStatusChoices, ShipmentStatusChoices, CourierChoices
 
@@ -9,7 +10,7 @@ from base.choices import PurchaseOrderStatusChoices, ShipmentStatusChoices, Cour
 class PurchaseOrder(BaseModel):
 	sales_order = models.OneToOneField('sales_orders.SalesOrder', on_delete=models.CASCADE, related_name='purchase_order')
 	purchase_date = models.DateField()
-	amount = models.DecimalField(max_digits=10, decimal_places=2)
+	amount = MoneyField(max_digits=10, decimal_places=2, default_currency='USD')
 	status = models.CharField(max_length=50, choices=PurchaseOrderStatusChoices.choices, default=PurchaseOrderStatusChoices.PENDING.value)
 	notes = models.TextField()
 	
@@ -26,16 +27,16 @@ class PurchaseOrderDetail(BaseModel):
 	external_id = models.CharField(max_length=50, db_index=True, blank=True, null=True, help_text='Order ID from the external system (e.g. Amazon, WooCommerce)')
 	purchase_order = models.ForeignKey(PurchaseOrder, on_delete=models.CASCADE, related_name='details')
 	product = models.ForeignKey(Product, on_delete=models.CASCADE)
-	provider = models.ForeignKey('products_providers.ProductProvider', on_delete=models.CASCADE)
+	seller = models.ForeignKey('sellers.Seller', on_delete=models.CASCADE)
 	quantity = models.PositiveIntegerField()
-	unit_price = models.DecimalField(max_digits=10, decimal_places=2) # USD
-	taxes = models.DecimalField(max_digits=10, decimal_places=2) # USD
+	unit_price = MoneyField(max_digits=10, decimal_places=2, default_currency='USD') # USD
+	taxes = MoneyField(max_digits=10, decimal_places=2, default_currency='USD')
 	total_price = GeneratedField(
 		expression=F('unit_price') * F('quantity') + F('taxes'),
 		output_field=models.DecimalField(max_digits=10, decimal_places=2),
 		db_persist=True
 	) # USD
-	link = models.URLField(blank=True, null=True, help_text='Link to the product in the provider website')
+	link = models.URLField(blank=True, null=True, help_text='Link to the product in the seller website')
 	estimated_delivery_date = models.DateField(blank=True, null=True)
 	delivery_date = models.DateField(blank=True, null=True)
 
@@ -46,14 +47,14 @@ class PurchaseOrderDetail(BaseModel):
 
 
 	def __str__(self):
-		return f'{self.product} - {self.provider}'
+		return f'{self.product} - {self.seller}'
 
 
 class PurchaseOrderDetailShipment(BaseModel):
 	"""Model to represent a shipment of a purchase order detail"""
 	order_detail = models.OneToOneField(PurchaseOrderDetail, on_delete=models.CASCADE, related_name='shipment')
 	tracking_number = models.CharField(max_length=50)
-	cost = models.DecimalField(max_digits=10, decimal_places=2) # USD
+	cost = MoneyField(max_digits=10, decimal_places=2, default_currency='USD')
 	courier = models.CharField(max_length=40, choices=CourierChoices.choices, default=CourierChoices.OTHER.value)
 	status = models.CharField(max_length=40, choices=ShipmentStatusChoices.choices, default=ShipmentStatusChoices.PENDING.value)
 	shipment_date = models.DateField(blank=True, null=True)
