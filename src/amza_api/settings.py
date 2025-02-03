@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 from pathlib import Path
+import moneyed
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -42,6 +44,8 @@ DJANGO_APPS = [
 THIRD_PARTY_APPS = [
 	'rest_framework',
 	'rest_framework_simplejwt',
+	'djmoney',
+	'djmoney.contrib.exchange',
 ]
 
 OWN_APPS = [
@@ -148,4 +152,18 @@ REST_FRAMEWORK = {
 	'PAGE_SIZE': 100,
 	'AUTH_HEADER_NAME': 'HTTP_X_ACCESS_TOKEN'
 }
+
+# Django Money
+WAREHOUSE_CURRENCY = moneyed.add_currency(
+	code='WHC',
+	numeric='999',
+	name='Warehouse Currency',
+	countries=('World',),
+)
+
+CURRENCIES = (
+	'USD',
+	'WHC',
+	'MXN'
+)
 
