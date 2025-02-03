@@ -50,8 +50,8 @@ OWN_APPS = [
     'apps.marketplaces',
     'apps.prep_centers',
     'apps.sales_orders',
-    # 'apps.purchases_orders',
-    # 'apps.products_providers',
+    'apps.purchases_orders',
+    'apps.sellers',
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + OWN_APPS
