@@ -1,3 +1,4 @@
+from djmoney.models.fields import MoneyField
 from django.db.models import F
 from django.db.models.fields.generated import GeneratedField
 from django.db import models
@@ -11,7 +12,7 @@ class SalesOrder(BaseModel):
 	external_id = models.CharField(max_length=50, db_index=True, help_text='Order ID from the external system (e.g. Amazon, WooCommerce)')
 	marketplace = models.ForeignKey('marketplaces.Marketplace', on_delete=models.PROTECT, related_name='sales_orders')
 	sale_date = models.DateField()
-	total_amount = models.DecimalField(max_digits=10, decimal_places=2)
+	total_amount = MoneyField(max_digits=10, decimal_places=2, default_currency='MXN')
 	status = models.CharField(max_length=50, choices=SalesOrderStatusChoices.choices, default=SalesOrderStatusChoices.PENDING.value)
 	delivery_promised_date = models.DateField(blank=True, null=True)
 	shipping_deadline = models.DateField(blank=True, null=True)
@@ -31,7 +32,7 @@ class SalesOrderDetail(BaseModel):
 	product = models.ForeignKey(Product, on_delete=models.PROTECT, related_name='sales_orders_details')
 	status = models.CharField(max_length=50, choices=SalesOrderStatusChoices.choices, default=SalesOrderStatusChoices.PENDING.value)
 	quantity = models.PositiveIntegerField()
-	unit_price = models.DecimalField(max_digits=10, decimal_places=2)
+	unit_price = MoneyField(max_digits=10, decimal_places=2, default_currency='MXN')
 	total_price = GeneratedField(
 		expression=F('unit_price') * F('quantity'),
 		output_field=models.DecimalField(max_digits=10, decimal_places=2),
@@ -55,7 +56,7 @@ class SalesOrderDetailShipment(BaseModel):
 	"""Model to represent a shipment of a sales order detail"""
 	order_detail = models.OneToOneField(SalesOrderDetail, on_delete=models.CASCADE, related_name='shipment')
 	tracking_number = models.CharField(max_length=50)
-	cost = models.DecimalField(max_digits=10, decimal_places=2)
+	cost = MoneyField(max_digits=10, decimal_places=2, default_currency='MXN')
 	courier = models.CharField(max_length=40, choices=CourierChoices.choices, default=CourierChoices.OTHER.value)
 	status = models.CharField(max_length=40, choices=ShipmentStatusChoices.choices, default=ShipmentStatusChoices.PENDING.value)
 	date_dispatched = models.DateField(blank=True, null=True)
