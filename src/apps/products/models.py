@@ -1,6 +1,6 @@
 from django.db import models
 from base.models import BaseModel
-
+from djmoney.models.fields import MoneyField
 
 class Product(BaseModel):
 	external_id = models.CharField(max_length=50, db_index=True, help_text='ASIN, WooCommerce ID')
@@ -23,7 +23,7 @@ class Product(BaseModel):
 
 class ProductPrice(BaseModel):
 	product = models.ForeignKey(Product, related_name='prices', on_delete=models.CASCADE)
-	amount = models.DecimalField(max_digits=10, decimal_places=2)
+	amount = MoneyField(max_digits=10, decimal_places=2, default_currency='USD')
 
 	def __str__(self):
 		return f"{self.product} - ${self.amount}"
