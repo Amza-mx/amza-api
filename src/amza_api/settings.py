@@ -167,3 +167,5 @@ CURRENCIES = (
 	'MXN'
 )
 
+
+EXCHANGE_BACKEND = 'djmoney.contrib.exchange.backends.FixerBackend'
