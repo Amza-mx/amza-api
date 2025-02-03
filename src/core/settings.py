@@ -12,11 +12,19 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 import moneyed
+import os
+import environ
 
+env = environ.Env(
+	DEBUG=(bool, False),
+	CURRENCIES=(list, []),
+	OPEN_EXCHANGE_RATES_APP_ID=(str, ''),
+)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+environ.Env.read_env()
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
@@ -25,7 +33,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-j^*!ywilx2yq^g$(*wk+fc^f890_r_@=)t!%#1)_2=ofqev17w'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env('DEBUG')
 
 ALLOWED_HOSTS = []
 
@@ -70,7 +78,7 @@ MIDDLEWARE = [
 	'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'amza_api.urls'
+ROOT_URLCONF = 'core.urls'
 
 TEMPLATES = [
 	{
@@ -88,7 +96,7 @@ TEMPLATES = [
 	},
 ]
 
-WSGI_APPLICATION = 'amza_api.wsgi.application'
+WSGI_APPLICATION = 'core.wsgi.application'
 
 
 # Database
@@ -161,11 +169,7 @@ WAREHOUSE_CURRENCY = moneyed.add_currency(
 	countries=('World',),
 )
 
-CURRENCIES = (
-	'USD',
-	'WHC',
-	'MXN'
-)
+CURRENCIES = env('CURRENCIES')
 
-
-EXCHANGE_BACKEND = 'djmoney.contrib.exchange.backends.FixerBackend'
+EXCHANGE_BACKEND = 'djmoney.contrib.exchange.backends.OpenExchangeRatesBackend'
+OPEN_EXCHANGE_RATES_APP_ID = env('OPEN_EXCHANGE_RATES_APP_ID')
