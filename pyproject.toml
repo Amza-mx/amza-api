@@ -5,6 +5,6 @@ indent-width = 4
 
 [tool.ruff.format]
 quote-style = "single"
-indent-style = "tab"
+indent-style = "space"
 docstring-code-format = true
 line-ending = "auto"
