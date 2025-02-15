@@ -5,24 +5,42 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
             name='Product',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                (
+                    'id',
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name='ID'
+                    ),
+                ),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('updated_at', models.DateTimeField(auto_now=True)),
-                ('external_id', models.CharField(db_index=True, help_text='ASIN, WooCommerce ID', max_length=50)),
+                (
+                    'external_id',
+                    models.CharField(
+                        db_index=True, help_text='ASIN, WooCommerce ID', max_length=50
+                    ),
+                ),
                 ('sku', models.CharField(db_index=True, max_length=50)),
                 ('title', models.CharField(max_length=500)),
                 ('description', models.TextField()),
-                ('category', models.CharField(choices=[('HEALTH AND HOUSEHOLD', 'Health & household'), ('TOYS AND GAMES', 'Toys & Games')], default='HEALTH AND HOUSEHOLD', max_length=40)),
+                (
+                    'category',
+                    models.CharField(
+                        choices=[
+                            ('HEALTH AND HOUSEHOLD', 'Health & household'),
+                            ('TOYS AND GAMES', 'Toys & Games'),
+                        ],
+                        default='HEALTH AND HOUSEHOLD',
+                        max_length=40,
+                    ),
+                ),
             ],
             options={
                 'abstract': False,
@@ -31,11 +49,23 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='ProductPrice',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                (
+                    'id',
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name='ID'
+                    ),
+                ),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('updated_at', models.DateTimeField(auto_now=True)),
                 ('amount', models.DecimalField(decimal_places=2, max_digits=10)),
-                ('product', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='prices', to='products.product')),
+                (
+                    'product',
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name='prices',
+                        to='products.product',
+                    ),
+                ),
             ],
             options={
                 'abstract': False,

@@ -6,7 +6,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
@@ -19,16 +18,50 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='SalesOrder',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                (
+                    'id',
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name='ID'
+                    ),
+                ),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('updated_at', models.DateTimeField(auto_now=True)),
-                ('external_id', models.CharField(db_index=True, help_text='Order ID from the external system (e.g. Amazon, WooCommerce)', max_length=50)),
+                (
+                    'external_id',
+                    models.CharField(
+                        db_index=True,
+                        help_text='Order ID from the external system (e.g. Amazon, WooCommerce)',
+                        max_length=50,
+                    ),
+                ),
                 ('sale_date', models.DateField()),
                 ('total_amount', models.DecimalField(decimal_places=2, max_digits=10)),
-                ('status', models.CharField(choices=[('PENDING', 'Pending'), ('BOUGHT', 'Bought'), ('IN_WAREHOUSE', 'In warehouse'), ('DELIVERY_PROCESS', 'Delivery process'), ('DELIVERED', 'Delivered'), ('CANCELLED', 'Cancelled'), ('RETURNED', 'Returned')], default='PENDING', max_length=50)),
+                (
+                    'status',
+                    models.CharField(
+                        choices=[
+                            ('PENDING', 'Pending'),
+                            ('BOUGHT', 'Bought'),
+                            ('IN_WAREHOUSE', 'In warehouse'),
+                            ('DELIVERY_PROCESS', 'Delivery process'),
+                            ('DELIVERED', 'Delivered'),
+                            ('CANCELLED', 'Cancelled'),
+                            ('RETURNED', 'Returned'),
+                        ],
+                        default='PENDING',
+                        max_length=50,
+                    ),
+                ),
                 ('delivery_promised_date', models.DateField(blank=True, null=True)),
                 ('shipping_deadline', models.DateField(blank=True, null=True)),
-                ('marketplace', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='sales_orders', to='marketplaces.marketplace')),
+                (
+                    'marketplace',
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.PROTECT,
+                        related_name='sales_orders',
+                        to='marketplaces.marketplace',
+                    ),
+                ),
             ],
             options={
                 'verbose_name': 'Sales Order',
@@ -38,18 +71,68 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='SalesOrderDetail',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                (
+                    'id',
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name='ID'
+                    ),
+                ),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('updated_at', models.DateTimeField(auto_now=True)),
-                ('status', models.CharField(choices=[('PENDING', 'Pending'), ('BOUGHT', 'Bought'), ('IN_WAREHOUSE', 'In warehouse'), ('DELIVERY_PROCESS', 'Delivery process'), ('DELIVERED', 'Delivered'), ('CANCELLED', 'Cancelled'), ('RETURNED', 'Returned')], default='PENDING', max_length=50)),
+                (
+                    'status',
+                    models.CharField(
+                        choices=[
+                            ('PENDING', 'Pending'),
+                            ('BOUGHT', 'Bought'),
+                            ('IN_WAREHOUSE', 'In warehouse'),
+                            ('DELIVERY_PROCESS', 'Delivery process'),
+                            ('DELIVERED', 'Delivered'),
+                            ('CANCELLED', 'Cancelled'),
+                            ('RETURNED', 'Returned'),
+                        ],
+                        default='PENDING',
+                        max_length=50,
+                    ),
+                ),
                 ('quantity', models.PositiveIntegerField()),
                 ('unit_price', models.DecimalField(decimal_places=2, max_digits=10)),
-                ('total_price', models.GeneratedField(db_persist=True, expression=django.db.models.expressions.CombinedExpression(models.F('unit_price'), '*', models.F('quantity')), output_field=models.DecimalField(decimal_places=2, max_digits=10))),
+                (
+                    'total_price',
+                    models.GeneratedField(
+                        db_persist=True,
+                        expression=django.db.models.expressions.CombinedExpression(
+                            models.F('unit_price'), '*', models.F('quantity')
+                        ),
+                        output_field=models.DecimalField(decimal_places=2, max_digits=10),
+                    ),
+                ),
                 ('dispatch_date', models.DateField(blank=True, null=True)),
                 ('prep_center_folio', models.CharField(blank=True, max_length=50, null=True)),
-                ('prep_center', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='sales_orders_details', to='prep_centers.prepcenter')),
-                ('product', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='sales_orders_details', to='products.product')),
-                ('sales_order', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='sales_orders_details', to='sales_orders.salesorder')),
+                (
+                    'prep_center',
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.PROTECT,
+                        related_name='sales_orders_details',
+                        to='prep_centers.prepcenter',
+                    ),
+                ),
+                (
+                    'product',
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.PROTECT,
+                        related_name='sales_orders_details',
+                        to='products.product',
+                    ),
+                ),
+                (
+                    'sales_order',
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name='sales_orders_details',
+                        to='sales_orders.salesorder',
+                    ),
+                ),
             ],
             options={
                 'verbose_name': 'Sales Order Detail',
@@ -59,17 +142,55 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='SalesOrderDetailShipment',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                (
+                    'id',
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name='ID'
+                    ),
+                ),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('updated_at', models.DateTimeField(auto_now=True)),
                 ('tracking_number', models.CharField(max_length=50)),
                 ('cost', models.DecimalField(decimal_places=2, max_digits=10)),
-                ('courier', models.CharField(choices=[('DHL', 'DHL'), ('UPS', 'UPS'), ('FEDEX', 'FedEx'), ('ESTAFETA', 'Estafeta'), ('OTHER', 'Other')], default='OTHER', max_length=40)),
-                ('status', models.CharField(choices=[('PENDING', 'Pending'), ('DISPATCHED', 'Dispatched'), ('IN_TRANSIT', 'In transit'), ('DELIVERED', 'Delivered'), ('CANCELLED', 'Cancelled')], default='PENDING', max_length=40)),
+                (
+                    'courier',
+                    models.CharField(
+                        choices=[
+                            ('DHL', 'DHL'),
+                            ('UPS', 'UPS'),
+                            ('FEDEX', 'FedEx'),
+                            ('ESTAFETA', 'Estafeta'),
+                            ('OTHER', 'Other'),
+                        ],
+                        default='OTHER',
+                        max_length=40,
+                    ),
+                ),
+                (
+                    'status',
+                    models.CharField(
+                        choices=[
+                            ('PENDING', 'Pending'),
+                            ('DISPATCHED', 'Dispatched'),
+                            ('IN_TRANSIT', 'In transit'),
+                            ('DELIVERED', 'Delivered'),
+                            ('CANCELLED', 'Cancelled'),
+                        ],
+                        default='PENDING',
+                        max_length=40,
+                    ),
+                ),
                 ('date_dispatched', models.DateField(blank=True, null=True)),
                 ('estimated_delivery_date', models.DateField(blank=True, null=True)),
                 ('delivery_date', models.DateField(blank=True, null=True)),
-                ('order_detail', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='shipment', to='sales_orders.salesorderdetail')),
+                (
+                    'order_detail',
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name='shipment',
+                        to='sales_orders.salesorderdetail',
+                    ),
+                ),
             ],
             options={
                 'verbose_name': 'Sales Order Detail Shipment',
@@ -79,13 +200,38 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='ShipmentTracking',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                (
+                    'id',
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name='ID'
+                    ),
+                ),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('updated_at', models.DateTimeField(auto_now=True)),
-                ('status', models.CharField(choices=[('PENDING', 'Pending'), ('DISPATCHED', 'Dispatched'), ('IN_TRANSIT', 'In transit'), ('DELIVERED', 'Delivered'), ('CANCELLED', 'Cancelled')], default='PENDING', max_length=50)),
+                (
+                    'status',
+                    models.CharField(
+                        choices=[
+                            ('PENDING', 'Pending'),
+                            ('DISPATCHED', 'Dispatched'),
+                            ('IN_TRANSIT', 'In transit'),
+                            ('DELIVERED', 'Delivered'),
+                            ('CANCELLED', 'Cancelled'),
+                        ],
+                        default='PENDING',
+                        max_length=50,
+                    ),
+                ),
                 ('status_date', models.DateTimeField()),
                 ('message', models.TextField(blank=True, null=True)),
-                ('sales_order_detail_shipment', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='tracking', to='sales_orders.salesorderdetailshipment')),
+                (
+                    'sales_order_detail_shipment',
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name='tracking',
+                        to='sales_orders.salesorderdetailshipment',
+                    ),
+                ),
             ],
             options={
                 'verbose_name': 'Shipment Tracking',

@@ -5,7 +5,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('products', '0003_productprice_amount_currency_and_more'),
     ]
@@ -14,6 +13,15 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='productprice',
             name='amount_currency',
-            field=djmoney.models.fields.CurrencyField(choices=[('MXN', 'Mexican Peso'), ('USD', 'US Dollar'), ('WHC', 'Warehouse Currency')], default='USD', editable=False, max_length=3),
+            field=djmoney.models.fields.CurrencyField(
+                choices=[
+                    ('MXN', 'Mexican Peso'),
+                    ('USD', 'US Dollar'),
+                    ('WHC', 'Warehouse Currency'),
+                ],
+                default='USD',
+                editable=False,
+                max_length=3,
+            ),
         ),
     ]
