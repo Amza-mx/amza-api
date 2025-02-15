@@ -4,7 +4,7 @@ from apps.sales_orders.models import (
     SalesOrder,
     SalesOrderDetail,
     SalesOrderDetailShipment,
-    ShipmentTracking
+    ShipmentTracking,
 )
 
 
@@ -17,8 +17,12 @@ class SalesOrderDetailInline(admin.TabularInline):
 @admin.register(SalesOrder)
 class SalesOrderAdmin(BaseAdmin):
     list_display = (
-        'external_id', 'marketplace', 'status', 'sale_date',
-        'delivery_promised_date', 'shipping_deadline'
+        'external_id',
+        'marketplace',
+        'status',
+        'sale_date',
+        'delivery_promised_date',
+        'shipping_deadline',
     )
     search_fields = ('external_id', 'marketplace', 'status')
     list_filter = ('marketplace', 'status')
@@ -29,6 +33,7 @@ class SalesOrderDetailShipmentInline(admin.TabularInline):
     model = SalesOrderDetailShipment
     extra = 0
     readonly_fields = ('created_at', 'updated_at')
+
 
 @admin.register(SalesOrderDetail)
 class SalesOrderDetailAdmin(BaseAdmin):

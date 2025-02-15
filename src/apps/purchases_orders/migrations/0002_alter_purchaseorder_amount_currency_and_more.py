@@ -5,7 +5,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('purchases_orders', '0001_initial'),
     ]
@@ -14,21 +13,57 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='purchaseorder',
             name='amount_currency',
-            field=djmoney.models.fields.CurrencyField(choices=[('MXN', 'Mexican Peso'), ('USD', 'US Dollar'), ('WHC', 'Warehouse Currency')], default='USD', editable=False, max_length=3),
+            field=djmoney.models.fields.CurrencyField(
+                choices=[
+                    ('MXN', 'Mexican Peso'),
+                    ('USD', 'US Dollar'),
+                    ('WHC', 'Warehouse Currency'),
+                ],
+                default='USD',
+                editable=False,
+                max_length=3,
+            ),
         ),
         migrations.AlterField(
             model_name='purchaseorderdetail',
             name='taxes_currency',
-            field=djmoney.models.fields.CurrencyField(choices=[('MXN', 'Mexican Peso'), ('USD', 'US Dollar'), ('WHC', 'Warehouse Currency')], default='USD', editable=False, max_length=3),
+            field=djmoney.models.fields.CurrencyField(
+                choices=[
+                    ('MXN', 'Mexican Peso'),
+                    ('USD', 'US Dollar'),
+                    ('WHC', 'Warehouse Currency'),
+                ],
+                default='USD',
+                editable=False,
+                max_length=3,
+            ),
         ),
         migrations.AlterField(
             model_name='purchaseorderdetail',
             name='unit_price_currency',
-            field=djmoney.models.fields.CurrencyField(choices=[('MXN', 'Mexican Peso'), ('USD', 'US Dollar'), ('WHC', 'Warehouse Currency')], default='USD', editable=False, max_length=3),
+            field=djmoney.models.fields.CurrencyField(
+                choices=[
+                    ('MXN', 'Mexican Peso'),
+                    ('USD', 'US Dollar'),
+                    ('WHC', 'Warehouse Currency'),
+                ],
+                default='USD',
+                editable=False,
+                max_length=3,
+            ),
         ),
         migrations.AlterField(
             model_name='purchaseorderdetailshipment',
             name='cost_currency',
-            field=djmoney.models.fields.CurrencyField(choices=[('MXN', 'Mexican Peso'), ('USD', 'US Dollar'), ('WHC', 'Warehouse Currency')], default='USD', editable=False, max_length=3),
+            field=djmoney.models.fields.CurrencyField(
+                choices=[
+                    ('MXN', 'Mexican Peso'),
+                    ('USD', 'US Dollar'),
+                    ('WHC', 'Warehouse Currency'),
+                ],
+                default='USD',
+                editable=False,
+                max_length=3,
+            ),
         ),
     ]
