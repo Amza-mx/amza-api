@@ -8,6 +8,7 @@ class Product(BaseModel):
     sku = models.CharField(max_length=50, db_index=True)
     title = models.CharField(max_length=500)
     description = models.TextField()
+    inventory_quantity = models.PositiveIntegerField(default=0, help_text='Stock available')
 
     class CategoriesChoices(models.TextChoices):
         HEALTH_AND_HOUSEHOLD = 'HEALTH AND HOUSEHOLD', 'Health & household'
