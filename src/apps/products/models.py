@@ -28,20 +28,6 @@ class Product(BaseModel):
         verbose_name_plural = 'Products'
 
 
-class ProductSeller(BaseModel):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='sellers')
-    seller = models.ForeignKey('sellers.Seller', on_delete=models.CASCADE)
-    cost_price = MoneyField(max_digits=10, decimal_places=2, default_currency='USD')
-    availability = models.BooleanField(default=True)
-
-    def __str__(self):
-        return f'{self.seller} - {self.product}'
-
-    class Meta:
-        verbose_name = 'Product Seller'
-        verbose_name_plural = 'Product Sellers'
-
-
 class ProductPrice(BaseModel):
     product = models.ForeignKey(Product, related_name='prices', on_delete=models.CASCADE)
     amount = MoneyField(max_digits=10, decimal_places=2, default_currency='USD')
