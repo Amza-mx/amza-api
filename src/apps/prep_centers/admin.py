@@ -13,3 +13,9 @@ class PrepCenterAdmin(BaseAdmin):
         'name',
         'address',
     )
+    raw_id_fields = (
+        'country',
+        'region',
+        'sub_region',
+        'city',
+    )
