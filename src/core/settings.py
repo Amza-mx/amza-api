@@ -53,6 +53,7 @@ THIRD_PARTY_APPS = [
     'rest_framework_simplejwt',
     'djmoney',
     'djmoney.contrib.exchange',
+    'cities_light',
 ]
 
 OWN_APPS = [
@@ -172,3 +173,7 @@ CURRENCIES = env('CURRENCIES')
 
 EXCHANGE_BACKEND = 'djmoney.contrib.exchange.backends.OpenExchangeRatesBackend'
 OPEN_EXCHANGE_RATES_APP_ID = env('OPEN_EXCHANGE_RATES_APP_ID')
+
+# Cities Light
+CITIES_LIGHT_TRANSLATION_LANGUAGES = ['en']
+CITIES_LIGHT_INCLUDE_COUNTRIES = ['US', 'MX']
