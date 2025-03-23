@@ -35,7 +35,7 @@ class SalesOrderDetailSerializer(serializers.ModelSerializer):
             'dispatch_date',
             'prep_center',
             'prep_center_folio',
-            'sales_order_detail_shipments'
+            'sales_order_detail_shipments',
             'created_at',
             'updated_at',
         )
