@@ -4,5 +4,5 @@ from api.v1.sales_orders.serializers import SalesOrderSerializer
 
 
 class SalesOrderViewSet(ModelViewSet):
-    serializer_class = SalesOrderSerializer
     queryset = SalesOrder.objects.all()
+    serializer_class = SalesOrderSerializer
