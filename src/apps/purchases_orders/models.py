@@ -111,3 +111,24 @@ class ShipmentTracking(BaseModel):
 
     def __str__(self):
         return f'{self.status} - {self.status_date}'
+
+
+class PurchaseOrderLogisticCost(BaseModel):
+    purchase_order = models.OneToOneField(
+        PurchaseOrder, on_delete=models.CASCADE, related_name='logistic_cost'
+    )
+    shipping_cost = MoneyField(max_digits=10, decimal_places=2, default_currency='USD')
+    customs_cost = MoneyField(max_digits=10, decimal_places=2, default_currency='USD')
+    other_costs = MoneyField(max_digits=10, decimal_places=2, default_currency='USD')
+    total_cost = GeneratedField(
+        expression=F('shipping_cost') + F('customs_cost') + F('other_costs'),
+        output_field=models.DecimalField(max_digits=10, decimal_places=2),
+        db_persist=True,
+    )
+
+    class Meta:
+        verbose_name = 'Purchase Order Logistic Cost'
+        verbose_name_plural = 'Purchase Order Logistic Costs'
+
+    def __str__(self):
+        return f'{self.purchase_order} - {self.total_cost}'

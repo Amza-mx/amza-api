@@ -1,5 +1,5 @@
 from djmoney.models.fields import MoneyField
-from django.db.models import F
+from django.db.models import F, Sum, aggregates
 from django.db.models.fields.generated import GeneratedField
 from django.db import models
 from base.models import BaseModel
@@ -43,6 +43,27 @@ class SalesOrder(BaseModel):
     )
     delivery_promised_date = models.DateField(blank=True, null=True)
     shipping_deadline = models.DateField(blank=True, null=True)
+
+    fees = GeneratedField(
+        expression=F('total_amount') * 0.15,
+        output_field=MoneyField(max_digits=10, decimal_places=2, default_currency='MXN'),
+        db_persist=True,
+    )
+    # yield
+    # Yield = total_amount - fees - shipping_cost
+    # Get the shipping cost from the related SalesOrderDetailShipment. One SalesOrder can have multiple SalesOrderDetailShipment.
+    yield_amount_before_shipping = GeneratedField(
+        expression=F('total_amount') - F('fees'),
+        output_field=MoneyField(max_digits=10, decimal_places=2, default_currency='MXN'),
+        db_persist=True,
+    )
+
+    @property
+    def get_shipping_cost(self):
+        return self.sales_orders_details.aggregate(
+            total_shipping_cost=Sum('shipment__cost')
+        )['total_shipping_cost'] or 0
+
 
     class Meta:
         verbose_name = 'Sales Order'
