@@ -55,8 +55,8 @@ class SalesOrderSerializer(serializers.ModelSerializer):
             'status',
             'delivery_promised_date',
             'shipping_deadline',
+            'sales_orders_details',
             'created_at',
             'updated_at',
-            'sales_orders_details',
         )
         read_only_fields = ('created_at', 'updated_at')
