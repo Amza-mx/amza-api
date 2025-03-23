@@ -6,6 +6,7 @@ paths = [
     path('', include('api.v1.auth.urls')),
     path('', include('api.v1.sales_orders.urls')),
     path('', include('api.v1.prep_centers.urls')),
+    path('', include('api.v1.marketplaces.urls')),
 ]
 
 urlpatterns = [
