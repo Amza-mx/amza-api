@@ -1,9 +1,9 @@
+from rest_framework import viewsets
 from apps.marketplaces.models import Marketplace
 from .serializers import MarketplaceSerializer
-from ..common.views import BaseModelViewSet
 
 
-class MarketplaceViewSet(BaseModelViewSet):
+class MarketplaceViewSet(viewsets.ModelViewSet):
     """
     ViewSet for viewing and editing marketplaces.
     """
