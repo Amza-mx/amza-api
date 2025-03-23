@@ -55,6 +55,7 @@ THIRD_PARTY_APPS = [
     'djmoney',
     'djmoney.contrib.exchange',
     'cities_light',
+    'drf_spectacular',
 ]
 
 OWN_APPS = [
