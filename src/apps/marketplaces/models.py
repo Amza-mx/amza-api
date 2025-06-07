@@ -20,8 +20,8 @@ class Marketplace(BaseModel):
     name = models.CharField(max_length=50)
 
     class PlatformChoices(models.TextChoices):
-        AMAZON = 'AMAZON', 'amazon'
-        WOOCOMMERCE = 'WOOCOMMERCE', 'woocommerce'
+        AMAZON = 'amazon', 'Amazon'
+        WOOCOMMERCE = 'woocommerce', 'WooCommerce'
 
     platform = models.CharField(
         max_length=50, choices=PlatformChoices, default=PlatformChoices.AMAZON.value
