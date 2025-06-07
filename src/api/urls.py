@@ -1,6 +1,7 @@
-from django.urls import path, include
+from django.urls import include, path
+from api.v1.urls import router as v1_router
 
-
+# Main URL Pattern for the API
 urlpatterns = [
-    path('', include([path('', include('api.v1.urls'))])),
+    path('v1/', include(v1_router.urls)),
 ]
