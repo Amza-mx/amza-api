@@ -63,6 +63,7 @@ OWN_APPS = [
     'apps.products',
     'apps.marketplaces',
     'apps.prep_centers',
+    'apps.warehouses',
     'apps.sales_orders',
     'apps.purchases_orders',
     'apps.sellers',
