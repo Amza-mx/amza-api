@@ -9,32 +9,32 @@ class BaseAdmin(admin.ModelAdmin):
     list display and readonly fields of all model admins that inherit from it.
     """
     
-    timestamps = ('created_at', 'updated_at')
+    timestamps = ['created_at', 'updated_at']
 
     def get_list_display(self, request):
         """
         Returns the list of fields to display in the admin list view.
-        
+
         Args:
             request: The HTTP request object.
-            
+
         Returns:
-            tuple: A tuple containing the model's list_display fields plus timestamp fields.
+            list: A list containing the model's list_display fields plus timestamp fields.
         """
-        return self.list_display + self.timestamps
+        return list(self.list_display) + self.timestamps
 
     def get_readonly_fields(self, request, obj=None):
         """
         Returns the list of readonly fields for the admin form.
-        
+
         Args:
             request: The HTTP request object.
             obj: The model instance being edited, or None if creating a new instance.
-            
+
         Returns:
-            tuple: A tuple containing the model's readonly fields plus timestamp fields.
+            list: A list containing the model's readonly fields plus timestamp fields.
         """
-        return self.readonly_fields + self.timestamps
+        return list(self.readonly_fields) + self.timestamps
 
 
 class AdminSite(admin.AdminSite):
