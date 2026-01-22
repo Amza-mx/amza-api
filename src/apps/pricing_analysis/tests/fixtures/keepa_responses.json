@@ -1,0 +1,56 @@
+{
+  "sample_product_us": {
+    "asin": "B07XYZ1234",
+    "title": "Test Product - Electronics",
+    "brand": "TestBrand",
+    "categoryTree": [
+      {
+        "catId": 541966,
+        "name": "Electronics"
+      }
+    ],
+    "csv": [
+      1599, 1699, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 1599
+    ],
+    "stats": {
+      "avg30": [1650],
+      "avg90": [1680]
+    },
+    "salesRanks": {
+      "current": [541966, 12000]
+    }
+  },
+  "sample_product_mx": {
+    "asin": "B07XYZ1234",
+    "title": "Test Product - Electronics",
+    "brand": "TestBrand",
+    "categoryTree": [
+      {
+        "catId": 541966,
+        "name": "Electronics"
+      }
+    ],
+    "csv": [
+      59900, 61900, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 59900
+    ],
+    "stats": {
+      "avg30": [60500],
+      "avg90": [61200]
+    },
+    "salesRanks": {
+      "current": [541966, 8500]
+    }
+  },
+  "unavailable_product": {
+    "asin": "B00NOTAVAIL",
+    "title": "Unavailable Product",
+    "brand": "TestBrand",
+    "csv": [
+      -1, -1, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, -1
+    ],
+    "stats": {
+      "avg30": [-1],
+      "avg90": [-1]
+    }
+  }
+}

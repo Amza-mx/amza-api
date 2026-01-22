@@ -67,6 +67,7 @@ OWN_APPS = [
     'apps.sales_orders',
     'apps.purchases_orders',
     'apps.sellers',
+    'apps.pricing_analysis',
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + OWN_APPS
@@ -86,7 +87,7 @@ ROOT_URLCONF = 'core.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -149,6 +150,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_DIRS = [BASE_DIR / 'static']
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
@@ -191,3 +194,7 @@ OPEN_EXCHANGE_RATES_APP_ID = env('OPEN_EXCHANGE_RATES_APP_ID')
 # Cities Light
 CITIES_LIGHT_TRANSLATION_LANGUAGES = ['en']
 CITIES_LIGHT_INCLUDE_COUNTRIES = ['US', 'MX']
+
+# Keepa Configuration
+KEEPA_API_KEY = env('KEEPA_API_KEY', default='')
+KEEPA_DAILY_TOKEN_LIMIT = env.int('KEEPA_DAILY_TOKEN_LIMIT', default=5000)
