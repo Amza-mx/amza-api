@@ -1,0 +1,27 @@
+<!-- Price History Chart Component -->
+<div class="card shadow-sm">
+    <div class="card-header bg-info text-white">
+        <h5 class="mb-0">
+            <i class="bi bi-graph-up"></i> Historial de Precios USA (Keepa)
+        </h5>
+    </div>
+    <div class="card-body">
+        {% if price_history_data.has_data %}
+            <canvas id="priceHistoryChart" height="80"></canvas>
+        {% else %}
+            <div class="alert alert-warning" role="alert">
+                <i class="bi bi-exclamation-triangle"></i>
+                No hay datos históricos disponibles para este producto.
+            </div>
+        {% endif %}
+    </div>
+
+    {% if price_history_data.has_data %}
+    <div class="card-footer bg-light text-muted">
+        <small>
+            <i class="bi bi-info-circle"></i>
+            Datos de Buy Box Price. Últimos {{ price_history_data.labels|length }} puntos de datos.
+        </small>
+    </div>
+    {% endif %}
+</div>

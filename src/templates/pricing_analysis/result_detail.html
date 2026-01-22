@@ -1,0 +1,111 @@
+{% extends "pricing_analysis/base.html" %}
+
+{% block title %}Análisis {{ analysis.asin }}{% endblock %}
+
+{% block content %}
+<div class="container-lg">
+    <!-- Header: ASIN, Product Title, Links -->
+    {% include "pricing_analysis/components/header.html" %}
+
+    <!-- Main Content: 2-column layout -->
+    <div class="row">
+        <!-- Left Column: Feasibility Badge + Price Comparison -->
+        <div class="col-lg-5 mb-4">
+            <div class="mb-4">
+                {% include "pricing_analysis/components/feasibility_badge.html" %}
+            </div>
+
+            <div>
+                {% include "pricing_analysis/components/price_comparison.html" %}
+            </div>
+        </div>
+
+        <!-- Right Column: Break Even Calculations -->
+        <div class="col-lg-7 mb-4">
+            {% include "pricing_analysis/components/breakeven_calculations.html" %}
+        </div>
+    </div>
+
+    <!-- Price History Chart (Full Width) -->
+    <div class="row">
+        <div class="col-12 mb-4">
+            {% include "pricing_analysis/components/price_history_chart.html" %}
+        </div>
+    </div>
+
+    <!-- Analysis Notes -->
+    {% if analysis.analysis_notes %}
+    <div class="row">
+        <div class="col-12 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-journal-text"></i> Notas del Análisis
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <pre class="mb-0" style="white-space: pre-wrap;">{{ analysis.analysis_notes }}</pre>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Metadata Footer -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card bg-light shadow-sm">
+                <div class="card-body py-2">
+                    <div class="row text-center text-muted">
+                        <div class="col-md-3">
+                            <small>
+                                <i class="bi bi-hash"></i>
+                                <strong>ID:</strong> {{ analysis.id }}
+                            </small>
+                        </div>
+                        <div class="col-md-3">
+                            <small>
+                                <i class="bi bi-calendar"></i>
+                                <strong>Creado:</strong> {{ analysis.created_at|date:"d/m/Y H:i" }}
+                            </small>
+                        </div>
+                        <div class="col-md-3">
+                            <small>
+                                <i class="bi bi-gear"></i>
+                                <strong>Config:</strong>
+                                {% if analysis.analysis_config %}
+                                    {{ analysis.analysis_config.name }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </small>
+                        </div>
+                        <div class="col-md-3">
+                            <small>
+                                <i class="bi bi-currency-exchange"></i>
+                                <strong>TC:</strong> {{ analysis.exchange_rate|floatformat:4 }}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Inicializar gráfica de Chart.js si hay datos
+    {% if price_history_data.has_data %}
+    const chartData = {
+        labels: {{ price_history_data.labels|safe }},
+        prices: {{ price_history_data.prices|safe }},
+        currency: '{{ price_history_data.currency }}'
+    };
+    initPriceChart('priceHistoryChart', chartData);
+    {% endif %}
+});
+</script>
+{% endblock %}

@@ -1,0 +1,90 @@
+<!-- Price Comparison Component -->
+<div class="card h-100 shadow-sm">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">
+            <i class="bi bi-currency-exchange"></i> Comparación de Precios
+        </h5>
+    </div>
+    <div class="card-body">
+        <table class="table table-borderless mb-0">
+            <tbody>
+                <tr>
+                    <td><strong>Precio USA:</strong></td>
+                    <td class="text-end price-value">
+                        {% if analysis.is_available_usa and analysis.usa_cost %}
+                            ${{ analysis.usa_cost.amount|floatformat:2 }} {{ analysis.usa_cost.currency }}
+                            <br>
+                            <small class="text-muted">
+                                (Fuente: {{ analysis.usa_cost_source|upper }})
+                            </small>
+                        {% else %}
+                            <span class="text-warning">No disponible</span>
+                        {% endif %}
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><strong>Precio actual Amazon MX:</strong></td>
+                    <td class="text-end price-value">
+                        {% if analysis.current_mx_amazon_price %}
+                            ${{ analysis.current_mx_amazon_price.amount|floatformat:2 }} {{ analysis.current_mx_amazon_price.currency }}
+                        {% else %}
+                            <span class="text-muted">-</span>
+                        {% endif %}
+                    </td>
+                </tr>
+
+                <tr class="table-warning">
+                    <td><strong>Break Even Price:</strong></td>
+                    <td class="text-end">
+                        <span class="fs-5 fw-bold text-warning price-value">
+                            {% if analysis.break_even_price %}
+                                ${{ analysis.break_even_price.amount|floatformat:2 }} {{ analysis.break_even_price.currency }}
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><strong>Precio recomendado (25% margen):</strong></td>
+                    <td class="text-end price-value">
+                        {% if analysis.recommended_price %}
+                            ${{ analysis.recommended_price.amount|floatformat:2 }} {{ analysis.recommended_price.currency }}
+                        {% else %}
+                            <span class="text-muted">-</span>
+                        {% endif %}
+                    </td>
+                </tr>
+
+                <tr class="border-top">
+                    <td><strong>Diferencia vs precio actual:</strong></td>
+                    <td class="text-end">
+                        {% if analysis.price_difference %}
+                            <span class="{% if analysis.price_difference.amount >= 0 %}text-success{% else %}text-danger{% endif %} fw-bold price-value">
+                                {% if analysis.price_difference.amount >= 0 %}+{% endif %}${{ analysis.price_difference.amount|floatformat:2 }} {{ analysis.price_difference.currency }}
+                            </span>
+                            <br>
+                            <small class="text-muted">
+                                ({{ metrics.price_diff_percentage|floatformat:1 }}% sobre Break Even)
+                            </small>
+                        {% else %}
+                            <span class="text-muted">-</span>
+                        {% endif %}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="card-footer bg-light text-muted">
+        <small>
+            <i class="bi bi-info-circle"></i>
+            Tipo de cambio: ${{ analysis.exchange_rate|floatformat:4 }} MXN/USD
+            {% if metrics.markup_multiplier %}
+                | Markup: {{ metrics.markup_multiplier }}x
+            {% endif %}
+        </small>
+    </div>
+</div>

@@ -1,0 +1,44 @@
+<!-- Header Component: ASIN, Product Title, Links -->
+<div class="card mb-4 shadow-sm">
+    <div class="card-body">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h2 class="mb-2">
+                    <i class="bi bi-upc-scan text-primary"></i>
+                    ASIN: <span class="text-primary">{{ analysis.asin }}</span>
+                </h2>
+
+                {% if analysis.usa_keepa_data and analysis.usa_keepa_data.title %}
+                <h5 class="text-muted mb-2">
+                    {{ analysis.usa_keepa_data.title|truncatechars:100 }}
+                </h5>
+                {% endif %}
+
+                <div class="text-muted">
+                    {% if analysis.product %}
+                        <i class="bi bi-box-seam"></i> SKU: <strong>{{ analysis.product.sku }}</strong>
+                    {% endif %}
+
+                    {% if analysis.usa_keepa_data and analysis.usa_keepa_data.brand %}
+                        | <i class="bi bi-tag"></i> Brand: <strong>{{ analysis.usa_keepa_data.brand }}</strong>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="col-md-4 text-end">
+                <div class="d-grid gap-2">
+                    <a href="https://www.amazon.com/dp/{{ analysis.asin }}"
+                       target="_blank"
+                       class="btn btn-outline-primary">
+                        <i class="bi bi-box-arrow-up-right"></i> Ver en Amazon USA
+                    </a>
+                    <a href="https://www.amazon.com.mx/dp/{{ analysis.asin }}"
+                       target="_blank"
+                       class="btn btn-outline-success">
+                        <i class="bi bi-box-arrow-up-right"></i> Ver en Amazon MX
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
