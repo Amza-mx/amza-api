@@ -9,7 +9,7 @@
         <table class="table table-borderless mb-0">
             <tbody>
                 <tr>
-                    <td><strong>Precio USA:</strong></td>
+                    <td><strong>Precio de Compra (USA):</strong></td>
                     <td class="text-end price-value">
                         {% if analysis.is_available_usa and analysis.usa_cost %}
                             ${{ analysis.usa_cost.amount|floatformat:2 }} {{ analysis.usa_cost.currency }}
@@ -24,7 +24,7 @@
                 </tr>
 
                 <tr>
-                    <td><strong>Precio actual Amazon MX:</strong></td>
+                    <td><strong>Precio de Venta (Amazon MX):</strong></td>
                     <td class="text-end price-value">
                         {% if analysis.current_mx_amazon_price %}
                             ${{ analysis.current_mx_amazon_price.amount|floatformat:2 }} {{ analysis.current_mx_amazon_price.currency }}

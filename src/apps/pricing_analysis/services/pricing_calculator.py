@@ -2,8 +2,33 @@
 Pricing Calculator Service
 
 Implements the Break Even calculation formula:
-Cost_Base = (USA_Cost * Exchange_Rate) * 1.20 * 1.16
-Break_Even = (Cost_Base + Shipping + (Cost_Base * 0.08) + (Cost_Base * 0.025)) / 0.85
+
+1. USA_Cost_MXN = USA_Cost_USD * Exchange_Rate * 1.0825
+   (1.0825 = 8.25% impuestos americanos)
+
+2. Import_Fees = USA_Cost_MXN * 0.20
+   (20% costos administrativos de importación)
+
+3. IVA_Import_Fees = Import_Fees * 0.16
+   (16% IVA sobre los fees de importación)
+
+4. Cost_Base = USA_Cost_MXN + Import_Fees + IVA_Import_Fees
+
+5. Total_Costs = Cost_Base + Shipping_Cost_MXN
+
+6. Break_Even_Base = Total_Costs / (1 - Marketplace_Fee_Rate)
+   (donde Marketplace_Fee_Rate = 0.15 para Amazon)
+
+7. VAT_Retention = (Cost_MX / 1.16) * 0.08
+   ISR_Retention = (Cost_MX / 1.16) * 0.025
+
+8. Break_Even_Final = Break_Even_Base + VAT_Retention + ISR_Retention
+
+Donde:
+- USA_Cost_USD: Precio de compra del producto en USA (obtenido de Keepa)
+- Exchange_Rate: Tipo de cambio USD→MXN actual
+- Cost_MX: Precio de venta del producto (puede ser el precio de Amazon MX u otro precio establecido)
+- Shipping_Cost_MXN: Costo de envío ($70-$100 MXN promedio)
 """
 
 from decimal import Decimal
@@ -26,7 +51,9 @@ class PricingCalculator:
         Calculate Break Even price based on USA cost and config parameters.
 
         Args:
-            usa_cost_usd: Product cost in USD
+            usa_cost_usd: Precio de compra del producto en USD (obtenido de Keepa)
+            cost_mx: Precio de venta del producto en MXN (puede ser el precio de Amazon MX
+                     u otro precio establecido)
             exchange_rate: USD to MXN exchange rate
             shipping_cost_mxn: Shipping cost in MXN
             config: Analysis configuration with tax rates

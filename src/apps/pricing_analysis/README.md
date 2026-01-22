@@ -25,20 +25,88 @@ Sistema automatizado que analiza la viabilidad de vender productos en Amazon MX 
 
 ## Fórmula del Break Even
 
-```
-Cost_Base = (USA_Cost * Exchange_Rate) * 1.20 * 1.16
-Break_Even = (Cost_Base + Shipping + (Cost_Base * 0.08) + (Cost_Base * 0.025)) / 0.85
+El cálculo del Break Even se realiza en los siguientes pasos:
 
-Donde:
-- USA_Cost: Costo del producto en USA (de Keepa)
-- Exchange_Rate: Tipo de cambio USD→MXN actual
-- 1.20: 20% costos administrativos de importación
-- 1.16: 16% IVA
-- Shipping: $70-$100 MXN (configurable por análisis)
-- 0.08: 8% retención IVA sobre cost base
-- 0.025: 2.5% retención ISR sobre cost base
-- 0.85: Porque Amazon cobra 15% fee (1 - 0.15)
+### Paso 1: Convertir costo USA a MXN con impuestos americanos
 ```
+USA_Cost_MXN = USA_Cost_USD * Exchange_Rate * 1.0825
+```
+- `1.0825` = 8.25% impuestos americanos
+
+### Paso 2: Calcular fees de importación
+```
+Import_Fees = USA_Cost_MXN * 0.20
+```
+- `0.20` = 20% costos administrativos de importación
+
+### Paso 3: Calcular IVA sobre los fees de importación
+```
+IVA_Import_Fees = Import_Fees * 0.16
+```
+- `0.16` = 16% IVA
+
+### Paso 4: Calcular costo base total
+```
+Cost_Base = USA_Cost_MXN + Import_Fees + IVA_Import_Fees
+```
+
+### Paso 5: Sumar costos de envío
+```
+Total_Costs = Cost_Base + Shipping_Cost_MXN
+```
+- `Shipping_Cost_MXN` = $70-$100 MXN (configurable)
+
+### Paso 6: Calcular Break Even base (con fee de marketplace)
+```
+Break_Even_Base = Total_Costs / (1 - 0.15)
+```
+- `0.15` = 15% fee de Amazon
+
+### Paso 7: Calcular retenciones fiscales
+```
+Cost_Base_Without_VAT = Cost_MX / 1.16
+VAT_Retention = Cost_Base_Without_VAT * 0.08
+ISR_Retention = Cost_Base_Without_VAT * 0.025
+```
+- `Cost_MX` = Precio de venta del producto (puede ser el precio de Amazon MX u otro precio establecido)
+- `0.08` = 8% retención IVA
+- `0.025` = 2.5% retención ISR
+
+### Paso 8: Break Even Final
+```
+Break_Even_Final = Break_Even_Base + VAT_Retention + ISR_Retention
+```
+
+### Ejemplo Numérico
+
+Para un producto con:
+- USA Cost (Precio de Compra): $50.00 USD
+- Exchange Rate: 20.00 MXN/USD
+- Shipping: $85.00 MXN
+- Cost MX (Precio de Venta): $1,500.00 MXN
+
+```
+1. USA_Cost_MXN = $50.00 * 20.00 * 1.0825 = $1,082.50 MXN
+2. Import_Fees = $1,082.50 * 0.20 = $216.50 MXN
+3. IVA_Import_Fees = $216.50 * 0.16 = $34.64 MXN
+4. Cost_Base = $1,082.50 + $216.50 + $34.64 = $1,333.64 MXN
+5. Total_Costs = $1,333.64 + $85.00 = $1,418.64 MXN
+6. Break_Even_Base = $1,418.64 / 0.85 = $1,668.99 MXN
+7. VAT_Retention = ($1,500.00 / 1.16) * 0.08 = $103.45 MXN
+   ISR_Retention = ($1,500.00 / 1.16) * 0.025 = $32.33 MXN
+8. Break_Even_Final = $1,668.99 + $103.45 + $32.33 = $1,804.77 MXN
+```
+
+### Notas Importantes sobre los Valores
+
+- **USA_Cost_USD**: Es el **precio de compra del producto** en USA. Se obtiene de Keepa API y representa el costo al que se puede adquirir el producto.
+
+- **Cost_MX**: Es el **precio de venta del producto** en México. Este valor puede ser:
+  - El precio actual en Amazon MX (obtenido de Keepa)
+  - Un precio personalizado establecido por el vendedor
+  - Un precio objetivo para el análisis
+
+  El sistema utiliza este valor para calcular las retenciones fiscales (IVA e ISR) que se aplican sobre el precio de venta.
 
 ## Instalación
 
