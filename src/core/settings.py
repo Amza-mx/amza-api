@@ -76,6 +76,7 @@ OWN_APPS = [
     'apps.purchases_orders',
     'apps.sellers',
     'apps.pricing_analysis',
+    'apps.home',
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + OWN_APPS

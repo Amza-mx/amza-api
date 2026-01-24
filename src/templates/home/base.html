@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Análisis de Pricing{% endblock %} - Amza API</title>
+    <title>{% block title %}Home{% endblock %} - Amza API</title>
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -11,12 +11,28 @@
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-
-    <!-- Custom CSS -->
-    {% load static %}
-    <link rel="stylesheet" href="{% static 'pricing_analysis/css/result_detail.css' %}">
+    <style>
+        .stat-card {
+            border-left: 4px solid;
+            transition: transform 0.2s;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        .feature-card {
+            transition: transform 0.2s, box-shadow 0.2s;
+            height: 100%;
+        }
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .hero-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 0;
+        }
+    </style>
 
     {% block extra_head %}{% endblock %}
 </head>
@@ -25,7 +41,7 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid">
             <a class="navbar-brand" href="/">
-                <i class="bi bi-graph-up-arrow"></i> Amza API - Pricing Analysis
+                <i class="bi bi-house-fill"></i> Amza API
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -39,17 +55,7 @@
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="/pricing-analysis/panorama/">
-                            <i class="bi bi-table"></i> Vista Panoramica
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/pricing-analysis/batch/">
-                            <i class="bi bi-upload"></i> Analizar ASINs
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/pricing-analysis/brands/">
-                            <i class="bi bi-shield-lock"></i> Marcas BAN
+                            <i class="bi bi-graph-up-arrow"></i> Pricing Analysis
                         </a>
                     </li>
                     <li class="nav-item">
@@ -58,17 +64,29 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/admin/pricing_analysis/pricinganalysisresult/">
-                            <i class="bi bi-list-check"></i> Ver Todos los Análisis
+                        <a class="nav-link" href="/api/v1/">
+                            <i class="bi bi-code-square"></i> API
                         </a>
                     </li>
+                    {% if user.is_authenticated %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-person-circle"></i> {{ user.username }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="/admin/logout/">
+                                <i class="bi bi-box-arrow-right"></i> Logout
+                            </a></li>
+                        </ul>
+                    </li>
+                    {% endif %}
                 </ul>
             </div>
         </div>
     </nav>
 
     <!-- Main Content -->
-    <main class="container-fluid py-4">
+    <main>
         {% block content %}{% endblock %}
     </main>
 
@@ -77,17 +95,14 @@
         <div class="container">
             <p class="mb-0">
                 <i class="bi bi-info-circle"></i>
-                Amza API - Sistema de Análisis de Pricing para Amazon MX
+                Amza API - E-commerce Management System
             </p>
-            <small>© 2026 - Generado con Django Templates</small>
+            <small>© 2026 - Built with Django & Bootstrap</small>
         </div>
     </footer>
 
     <!-- Bootstrap JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
-    <!-- Custom JS -->
-    <script src="{% static 'pricing_analysis/js/price_chart.js' %}"></script>
 
     {% block extra_js %}{% endblock %}
 </body>

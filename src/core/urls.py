@@ -6,6 +6,7 @@ admin.site.site_title = 'Amza API'
 admin.site.index_title = 'Welcome to Amza API'
 
 urlpatterns = [
+    path('', include('apps.home.urls')),
     path('admin/', admin.site.urls),
     path('api/', include('api.urls')),
     path('pricing-analysis/', include('apps.pricing_analysis.urls')),

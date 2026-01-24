@@ -1,0 +1,230 @@
+{% extends 'home/base.html' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h1 class="display-4 fw-bold mb-3">
+                    <i class="bi bi-rocket-takeoff"></i> Welcome to Amza API
+                </h1>
+                <p class="lead mb-0">
+                    E-commerce management platform for multi-marketplace operations
+                </p>
+            </div>
+            <div class="col-lg-4 text-end">
+                <i class="bi bi-graph-up display-1"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Statistics -->
+<div class="container mt-5">
+    <h2 class="mb-4">
+        <i class="bi bi-bar-chart-fill"></i> Quick Statistics
+    </h2>
+    <div class="row g-4">
+        <div class="col-md-6 col-lg-3">
+            <div class="card stat-card border-primary">
+                <div class="card-body">
+                    <h6 class="text-muted mb-2">Total Analyses</h6>
+                    <h2 class="mb-0">{{ stats.total_analyses }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="card stat-card border-success">
+                <div class="card-body">
+                    <h6 class="text-muted mb-2">Feasible Products</h6>
+                    <h2 class="mb-0 text-success">{{ stats.feasible_products }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="card stat-card border-info">
+                <div class="card-body">
+                    <h6 class="text-muted mb-2">Recent Analyses (7 days)</h6>
+                    <h2 class="mb-0 text-info">{{ stats.recent_analyses }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="card stat-card border-warning">
+                <div class="card-body">
+                    <h6 class="text-muted mb-2">Blocked Brands</h6>
+                    <h2 class="mb-0 text-warning">{{ stats.blocked_brands }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Navigation Cards -->
+<div class="container mt-5">
+    <h2 class="mb-4">
+        <i class="bi bi-grid-fill"></i> Features
+    </h2>
+    <div class="row g-4">
+        <!-- Pricing Analysis Dashboard -->
+        <div class="col-md-6 col-lg-4">
+            <a href="/pricing-analysis/panorama/" class="text-decoration-none">
+                <div class="card feature-card">
+                    <div class="card-body text-center">
+                        <i class="bi bi-graph-up-arrow display-1 text-primary mb-3"></i>
+                        <h5 class="card-title">Pricing Analysis Dashboard</h5>
+                        <p class="card-text text-muted">
+                            View comprehensive pricing analysis results with detailed metrics and insights
+                        </p>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <!-- Batch Analysis -->
+        <div class="col-md-6 col-lg-4">
+            <a href="/pricing-analysis/batch/" class="text-decoration-none">
+                <div class="card feature-card">
+                    <div class="card-body text-center">
+                        <i class="bi bi-upload display-1 text-success mb-3"></i>
+                        <h5 class="card-title">Batch Analysis</h5>
+                        <p class="card-text text-muted">
+                            Upload and analyze multiple ASINs from Amazon and other marketplaces
+                        </p>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <!-- Brand Management -->
+        <div class="col-md-6 col-lg-4">
+            <a href="/pricing-analysis/brands/" class="text-decoration-none">
+                <div class="card feature-card">
+                    <div class="card-body text-center">
+                        <i class="bi bi-shield-lock display-1 text-warning mb-3"></i>
+                        <h5 class="card-title">Brand Management</h5>
+                        <p class="card-text text-muted">
+                            Manage allowed and blocked brands for marketplace operations
+                        </p>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <!-- Admin Panel -->
+        <div class="col-md-6 col-lg-4">
+            <a href="/admin/" class="text-decoration-none">
+                <div class="card feature-card">
+                    <div class="card-body text-center">
+                        <i class="bi bi-gear-fill display-1 text-secondary mb-3"></i>
+                        <h5 class="card-title">Admin Panel</h5>
+                        <p class="card-text text-muted">
+                            Manage users, products, orders, and system configuration
+                        </p>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <!-- API Documentation -->
+        <div class="col-md-6 col-lg-4">
+            <a href="/api/v1/" class="text-decoration-none">
+                <div class="card feature-card">
+                    <div class="card-body text-center">
+                        <i class="bi bi-code-square display-1 text-info mb-3"></i>
+                        <h5 class="card-title">API Documentation</h5>
+                        <p class="card-text text-muted">
+                            Explore REST API endpoints and integration documentation
+                        </p>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <!-- Keepa Data -->
+        <div class="col-md-6 col-lg-4">
+            <a href="/admin/pricing_analysis/keepaproductdata/" class="text-decoration-none">
+                <div class="card feature-card">
+                    <div class="card-body text-center">
+                        <i class="bi bi-database-fill display-1 text-danger mb-3"></i>
+                        <h5 class="card-title">Keepa Data</h5>
+                        <p class="card-text text-muted">
+                            View and manage product data synced from Keepa API
+                        </p>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Additional Resources -->
+<div class="container mt-5 mb-5">
+    <h2 class="mb-4">
+        <i class="bi bi-bookmark-fill"></i> Additional Resources
+    </h2>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="bi bi-list-check"></i> Quick Links
+                    </h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <a href="/admin/pricing_analysis/pricinganalysisresult/" class="text-decoration-none">
+                                <i class="bi bi-arrow-right-circle"></i> All Analysis Results
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="/admin/pricing_analysis/brandrestriction/" class="text-decoration-none">
+                                <i class="bi bi-arrow-right-circle"></i> Brand Restrictions
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="/admin/products/product/" class="text-decoration-none">
+                                <i class="bi bi-arrow-right-circle"></i> Product Catalog
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="/admin/sales_orders/salesorder/" class="text-decoration-none">
+                                <i class="bi bi-arrow-right-circle"></i> Sales Orders
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="bi bi-info-circle"></i> System Info
+                    </h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle text-success"></i>
+                            <strong>Total Brands:</strong> {{ stats.total_brands }}
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle text-success"></i>
+                            <strong>Allowed Brands:</strong> {{ stats.allowed_brands }}
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-database"></i>
+                            <strong>USA Products:</strong> {{ stats.usa_products }}
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-database"></i>
+                            <strong>MX Products:</strong> {{ stats.mx_products }}
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
