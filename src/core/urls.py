@@ -1,11 +1,19 @@
 from django.contrib import admin
 from django.urls import path, include
+from django.http import JsonResponse
 
 admin.site.site_header = 'Amza API'
 admin.site.site_title = 'Amza API'
 admin.site.index_title = 'Welcome to Amza API'
 
+
+def root_healthcheck(request):
+    """Simple healthcheck at root for Railway"""
+    return JsonResponse({"status": "ok", "service": "amza-api"})
+
+
 urlpatterns = [
+    path('', root_healthcheck, name='root-healthcheck'),
     path('admin/', admin.site.urls),
     path('api/', include('api.urls')),
     path('pricing-analysis/', include('apps.pricing_analysis.urls')),
