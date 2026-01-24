@@ -20,6 +20,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='salesorder',
             name='yield_amount_before_shipping',
-            field=models.GeneratedField(db_persist=True, expression=django.db.models.expressions.CombinedExpression(models.F('total_amount'), '-', models.F('fees')), output_field=djmoney.models.fields.MoneyField(decimal_places=2, default_currency='MXN', max_digits=10)),
+            field=models.GeneratedField(db_persist=True, expression=django.db.models.expressions.CombinedExpression(models.F('total_amount'), '*', models.Value(0.85)), output_field=djmoney.models.fields.MoneyField(decimal_places=2, default_currency='MXN', max_digits=10)),
         ),
     ]

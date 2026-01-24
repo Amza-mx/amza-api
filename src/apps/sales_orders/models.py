@@ -52,8 +52,10 @@ class SalesOrder(BaseModel):
     # yield
     # Yield = total_amount - fees - shipping_cost
     # Get the shipping cost from the related SalesOrderDetailShipment. One SalesOrder can have multiple SalesOrderDetailShipment.
+    # PostgreSQL doesn't allow generated columns to reference other generated columns,
+    # so we calculate this directly: total_amount - (total_amount * 0.15) = total_amount * 0.85
     yield_amount_before_shipping = GeneratedField(
-        expression=F('total_amount') - F('fees'),
+        expression=F('total_amount') * 0.85,
         output_field=MoneyField(max_digits=10, decimal_places=2, default_currency='MXN'),
         db_persist=True,
     )
