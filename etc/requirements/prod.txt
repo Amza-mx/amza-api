@@ -1,1 +1,13 @@
 -r base.txt
+
+# PostgreSQL adapter for production
+psycopg[binary]==3.1.18
+
+# Production WSGI server
+gunicorn==21.2.0
+
+# Static files serving in production
+whitenoise==6.6.0
+
+# CORS headers for API access from different origins
+django-cors-headers==4.3.1

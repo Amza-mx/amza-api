@@ -18,6 +18,9 @@ env = environ.Env(
     DEBUG=(bool, False),
     CURRENCIES=(list, []),
     OPEN_EXCHANGE_RATES_APP_ID=(str, ''),
+    SECRET_KEY=(str, 'django-insecure-j^*!ywilx2yq^g$(*wk+fc^f890_r_@=)t!%#1)_2=ofqev17w'),
+    ALLOWED_HOSTS=(list, []),
+    CORS_ALLOWED_ORIGINS=(list, []),
 )
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -29,12 +32,12 @@ environ.Env.read_env()
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-j^*!ywilx2yq^g$(*wk+fc^f890_r_@=)t!%#1)_2=ofqev17w'
+SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env('DEBUG')
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = env('ALLOWED_HOSTS')
 
 
 # Application definition
@@ -49,6 +52,7 @@ DJANGO_APPS = [
 ]
 
 THIRD_PARTY_APPS = [
+    'corsheaders',
     'django_extensions',
     'rest_framework',
     'rest_framework_simplejwt',
@@ -74,8 +78,10 @@ INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + OWN_APPS
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -106,12 +112,19 @@ WSGI_APPLICATION = 'core.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+# Use DATABASE_URL if provided (production), otherwise default to SQLite (development)
+if env('DATABASE_URL', default=None):
+    DATABASES = {
+        'default': env.db_url('DATABASE_URL')
     }
-}
+else:
+    # Default SQLite configuration for development
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 
 # Password validation
@@ -152,6 +165,45 @@ USE_TZ = True
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [BASE_DIR / 'static']
+
+# WhiteNoise configuration for efficient static file serving
+STORAGES = {
+    'default': {
+        'BACKEND': 'django.core.files.storage.FileSystemStorage',
+    },
+    'staticfiles': {
+        'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
+    },
+}
+
+# CORS Configuration
+# Allow frontend applications to consume the API
+CORS_ALLOWED_ORIGINS = env.list('CORS_ALLOWED_ORIGINS', default=[])
+
+# In development, allow all origins (only when DEBUG=True)
+if DEBUG:
+    CORS_ALLOW_ALL_ORIGINS = True
+else:
+    # Production: use CORS_ALLOWED_ORIGINS from environment
+    # Example: CORS_ALLOWED_ORIGINS=https://myapp.com,https://www.myapp.com
+    CORS_ALLOW_ALL_ORIGINS = False
+
+# Allow credentials (cookies, authorization headers) in CORS requests
+CORS_ALLOW_CREDENTIALS = True
+
+# Allow common headers
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+    'x-access-token',  # Custom header used by this API
+]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field

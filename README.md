@@ -58,6 +58,43 @@ pip install -r etc/requirements/dev.txt
 pip install -r etc/requirements/prod.txt
 ```
 
+#### Nota sobre Base de Datos
+
+El proyecto soporta dos configuraciones de base de datos según el entorno:
+
+**Entorno de Desarrollo (SQLite - por defecto):**
+- No requiere configuración adicional
+- Se crea automáticamente en `src/db.sqlite3`
+- Ideal para desarrollo local y pruebas
+
+**Entorno de Producción (PostgreSQL):**
+```bash
+# 1. Instalar dependencias de producción
+pip install -r etc/requirements/prod.txt
+
+# 2. Configurar DATABASE_URL en el archivo .env
+DATABASE_URL=postgresql://usuario:contraseña@host:5432/nombre_bd
+
+# Ejemplo con SSL (recomendado para producción):
+DATABASE_URL=postgresql://amza_user:password123@db.example.com:5432/amza_db?sslmode=require
+```
+
+El sistema detecta automáticamente qué base de datos usar según la presencia de la variable `DATABASE_URL`.
+
+**Migración de Datos (SQLite a PostgreSQL):**
+```bash
+# 1. Exportar datos desde SQLite
+python src/manage.py dumpdata --natural-foreign --natural-primary -e contenttypes -e auth.Permission > datadump.json
+
+# 2. Configurar DATABASE_URL para PostgreSQL en .env
+
+# 3. Ejecutar migraciones en PostgreSQL
+python src/manage.py migrate
+
+# 4. Importar datos
+python src/manage.py loaddata datadump.json
+```
+
 ### 4. Configurar Variables de Entorno
 
 Copia el archivo de ejemplo y configúralo con tus credenciales:
@@ -74,8 +111,10 @@ SECRET_KEY=tu_secret_key_aqui_muy_segura
 DEBUG=True
 ALLOWED_HOSTS=localhost,127.0.0.1
 
-# Database (SQLite por defecto, cambiar para PostgreSQL en producción)
-# DATABASE_URL=sqlite:///db.sqlite3
+# Database Configuration
+# Desarrollo: Dejar comentado para usar SQLite (por defecto)
+# Producción: Descomentar y configurar PostgreSQL
+# DATABASE_URL=postgresql://username:password@host:port/database_name
 
 # Open Exchange Rates API (para tipos de cambio)
 OPEN_EXCHANGE_RATES_APP_ID=tu_api_key_aqui
@@ -410,6 +449,98 @@ Usamos Conventional Commits:
 ## 📄 Licencia
 
 Este proyecto es propiedad de Amza MX.
+
+## 🚀 Despliegue en Railway
+
+### Requisitos Previos
+
+1. Cuenta en [Railway](https://railway.app/)
+2. Repositorio Git con el código
+3. API keys configuradas (Open Exchange Rates, Keepa)
+
+### Pasos para Desplegar
+
+#### 1. Crear Proyecto en Railway
+
+1. Accede a [Railway Dashboard](https://railway.app/dashboard)
+2. Click en "New Project"
+3. Selecciona "Deploy from GitHub repo"
+4. Autoriza Railway para acceder a tu repositorio
+5. Selecciona el repositorio `amza-api`
+
+#### 2. Agregar Base de Datos PostgreSQL
+
+1. En tu proyecto Railway, click en "New"
+2. Selecciona "Database" → "Add PostgreSQL"
+3. Railway creará automáticamente la base de datos y configurará `DATABASE_URL`
+
+#### 3. Configurar Variables de Entorno
+
+En la pestaña "Variables" del servicio, agrega:
+
+```env
+DEBUG=false
+SECRET_KEY=<genera-una-clave-segura>
+ALLOWED_HOSTS=<tu-app>.up.railway.app
+OPEN_EXCHANGE_RATES_APP_ID=<tu-api-key>
+KEEPA_API_KEY=<tu-api-key>
+CURRENCIES='USD,MXN'
+```
+
+**Generar SECRET_KEY seguro:**
+```bash
+python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
+```
+
+#### 4. Despliegue Automático
+
+Railway detecta automáticamente el `Dockerfile` y despliega:
+- ✅ Instala dependencias de producción
+- ✅ Ejecuta migraciones de base de datos
+- ✅ Recolecta archivos estáticos
+- ✅ Inicia servidor Gunicorn
+
+#### 5. Crear Superusuario
+
+Desde el Railway Dashboard:
+1. Ve a tu servicio desplegado
+2. Click en "Shell" o "Terminal"
+3. Ejecuta:
+```bash
+python src/manage.py createsuperuser
+```
+
+#### 6. Verificar Despliegue
+
+- Admin: `https://<tu-app>.up.railway.app/admin/`
+- API: `https://<tu-app>.up.railway.app/api/v1/`
+
+### Actualizaciones
+
+Railway redespliega automáticamente cuando haces push a la rama principal:
+
+```bash
+git add .
+git commit -m "Update feature"
+git push origin main
+# Railway despliega automáticamente
+```
+
+### Solución de Problemas
+
+**Error en migraciones:**
+- Revisa logs en Railway Dashboard
+- Verifica que `DATABASE_URL` esté configurado
+- Asegúrate que PostgreSQL esté corriendo
+
+**Error 502/503:**
+- Verifica que `ALLOWED_HOSTS` incluya tu dominio de Railway
+- Revisa logs de Gunicorn en Dashboard
+- Confirma que el puerto 8000 esté expuesto
+
+**Archivos estáticos no se cargan:**
+- Verifica que WhiteNoise esté en MIDDLEWARE (settings.py)
+- Confirma que `collectstatic` se ejecutó (revisa logs de despliegue)
 
 ## 🤝 Soporte
 
