@@ -156,6 +156,13 @@
                                 <a class="fw-semibold text-decoration-none" href="{{ row.detail_url }}">
                                     {{ row.asin }}
                                 </a>
+                                <div class="mt-2">
+                                    <a class="btn btn-sm btn-primary"
+                                       href="https://sellercentral.amazon.com.mx/interactive/listing/workflow/offer/offer?asin={{ row.asin }}&conditionType=new"
+                                       target="_blank">
+                                        <i class="bi bi-upload"></i> Publicar en AMZ
+                                    </a>
+                                </div>
                             </td>
                             <td data-col="precio-mx" class="text-end price-value">
                                 {% if row.precio_mx %}
@@ -247,7 +254,7 @@
                                 {% endif %}
                                 {% if row.margen_neto_actual %}
                                     <div class="text-muted small mt-1">
-                                        Margen neto: {{ row.margen_neto_actual|floatformat:2 }}%
+                                        Margen neto sobre Revenue: {{ row.margen_neto_actual|floatformat:2 }}%
                                     </div>
                                 {% endif %}
                                 {% if row.utilidad_neta_actual %}
