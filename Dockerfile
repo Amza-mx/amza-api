@@ -16,12 +16,11 @@ COPY etc/requirements/ ./etc/requirements/
 # Install production dependencies with pip
 RUN pip install --no-cache-dir -r etc/requirements/prod.txt
 
-# Copy entrypoint and set permissions before copying app code
-COPY entrypoint.sh /app/entrypoint.sh
-RUN chmod +x /app/entrypoint.sh
-
 # Copy application code
 COPY . .
+
+# Set execute permissions on entrypoint (after copying all files)
+RUN chmod +x /app/entrypoint.sh
 
 # Change to src directory where manage.py is located
 WORKDIR /app/src
@@ -29,5 +28,5 @@ WORKDIR /app/src
 # Expose port
 EXPOSE 8000
 
-# Use entrypoint script
-CMD ["/app/entrypoint.sh"]
+# Use entrypoint script with sh to ensure execution
+CMD ["sh", "/app/entrypoint.sh"]
