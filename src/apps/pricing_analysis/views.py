@@ -166,11 +166,21 @@ class PricingAnalysisPanoramaView(LoginRequiredMixin, ListView):
                 utilidad_neta_actual = (current_price - break_even_base - (current_price * retention_factor)).quantize(Decimal('0.01'))
                 margen_neto_actual = (utilidad_neta_actual / current_price * Decimal('100')).quantize(Decimal('0.01'))
 
+            mx_bought = (
+                analysis.mx_keepa_data.raw_data.get('stats', {}).get('buyBoxCount')
+                if analysis.mx_keepa_data and analysis.mx_keepa_data.raw_data else None
+            )
+            mx_rank = analysis.mx_keepa_data.sales_rank if analysis.mx_keepa_data else None
+
             rows.append({
                 'id': analysis.id,
                 'asin': analysis.asin,
                 'detail_url': reverse('pricing_analysis:result_detail', args=[analysis.pk]),
                 'image_url': image_url,
+                'bought_past_month_us': analysis.usa_keepa_data.raw_data.get('stats', {}).get('buyBoxCount') if analysis.usa_keepa_data and analysis.usa_keepa_data.raw_data else None,
+                'sales_rank_us': analysis.usa_keepa_data.sales_rank if analysis.usa_keepa_data else None,
+                'bought_past_month_mx': mx_bought,
+                'sales_rank_mx': mx_rank,
                 'precio_mx': analysis.current_mx_amazon_price.amount if analysis.current_mx_amazon_price else None,
                 'precio_usa_usd': analysis.usa_cost.amount if analysis.usa_cost else None,
                 'taxes': import_taxes_usd,
@@ -374,6 +384,21 @@ class PricingAnalysisResultDetailView(LoginRequiredMixin, DetailView):
         # Estado de marca
         context['brand_status'] = _get_brand_status(analysis)
         context['image_url'] = _get_first_image_url(analysis)
+        context['bought_past_month_us'] = (
+            analysis.usa_keepa_data.raw_data.get('stats', {}).get('buyBoxCount')
+            if analysis.usa_keepa_data and analysis.usa_keepa_data.raw_data else None
+        )
+        context['sales_rank_us'] = analysis.usa_keepa_data.sales_rank if analysis.usa_keepa_data else None
+        context['bought_past_month_mx'] = (
+            analysis.mx_keepa_data.raw_data.get('stats', {}).get('buyBoxCount')
+            if analysis.mx_keepa_data and analysis.mx_keepa_data.raw_data else None
+        )
+        context['sales_rank_mx'] = analysis.mx_keepa_data.sales_rank if analysis.mx_keepa_data else None
+        context['bought_past_month'] = (
+            analysis.usa_keepa_data.raw_data.get('stats', {}).get('buyBoxCount')
+            if analysis.usa_keepa_data and analysis.usa_keepa_data.raw_data else None
+        )
+        context['sales_rank'] = analysis.usa_keepa_data.sales_rank if analysis.usa_keepa_data else None
 
         # Configuración de badges de confianza
         context['confidence_badges'] = {

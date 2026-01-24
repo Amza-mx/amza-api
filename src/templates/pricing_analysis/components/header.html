@@ -27,6 +27,20 @@
                             {% if analysis.usa_keepa_data and analysis.usa_keepa_data.brand %}
                                 | <i class="bi bi-tag"></i> Brand: <strong>{{ analysis.usa_keepa_data.brand }}</strong>
                             {% endif %}
+                            {% if sales_rank_us or sales_rank_mx %}
+                                | <i class="bi bi-graph-down"></i> Sales Rank:
+                                <strong>
+                                    {% if sales_rank_us %}US {{ sales_rank_us }}{% endif %}
+                                    {% if sales_rank_mx %}{% if sales_rank_us %} / {% endif %}MX {{ sales_rank_mx }}{% endif %}
+                                </strong>
+                            {% endif %}
+                            {% if bought_past_month_us or bought_past_month_mx %}
+                                | <i class="bi bi-bag-check"></i> Bought in past month:
+                                <strong>
+                                    {% if bought_past_month_us %}US {{ bought_past_month_us }}{% endif %}
+                                    {% if bought_past_month_mx %}{% if bought_past_month_us %} / {% endif %}MX {{ bought_past_month_mx }}{% endif %}
+                                </strong>
+                            {% endif %}
                         </div>
                     </div>
                 </div>

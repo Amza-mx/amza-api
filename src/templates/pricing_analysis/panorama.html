@@ -63,15 +63,23 @@
                         <button class="btn btn-outline-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
                             <i class="bi bi-layout-three-columns"></i> Columnas
                         </button>
-                        <div class="dropdown-menu p-3 col-toggle-menu">
-                            <div class="col-toggle-item">
-                                <input class="form-check-input" type="checkbox" data-col-toggle="asin" checked>
-                                <label class="form-check-label">ASIN</label>
-                            </div>
-                            <div class="col-toggle-item">
-                                <input class="form-check-input" type="checkbox" data-col-toggle="precio-mx" checked>
-                                <label class="form-check-label">Precio en MEX</label>
-                            </div>
+                            <div class="dropdown-menu p-3 col-toggle-menu">
+                                <div class="col-toggle-item">
+                                    <input class="form-check-input" type="checkbox" data-col-toggle="asin" checked>
+                                    <label class="form-check-label">ASIN</label>
+                                </div>
+                                <div class="col-toggle-item">
+                                    <input class="form-check-input" type="checkbox" data-col-toggle="bought" checked>
+                                    <label class="form-check-label">Bought in past month</label>
+                                </div>
+                                <div class="col-toggle-item">
+                                    <input class="form-check-input" type="checkbox" data-col-toggle="rank" checked>
+                                    <label class="form-check-label">Sales Rank</label>
+                                </div>
+                                <div class="col-toggle-item">
+                                    <input class="form-check-input" type="checkbox" data-col-toggle="precio-mx" checked>
+                                    <label class="form-check-label">Precio en MEX</label>
+                                </div>
                             <div class="col-toggle-item">
                                 <input class="form-check-input" type="checkbox" data-col-toggle="precio-usa-usd" checked>
                                 <label class="form-check-label">Precio en USA (USD)</label>
@@ -134,6 +142,8 @@
                     <thead>
                         <tr>
                             <th data-col="asin">ASIN</th>
+                            <th data-col="bought">Bought (US/MX)</th>
+                            <th data-col="rank">Sales Rank (US/MX)</th>
                             <th data-col="precio-mx">Precio en MEX</th>
                             <th data-col="precio-usa-usd">Precio en USA (USD)</th>
                             <th data-col="taxes">TAXES (USD)</th>
@@ -168,6 +178,22 @@
                                         <i class="bi bi-upload"></i> Publicar en AMZ
                                     </a>
                                 </div>
+                            </td>
+                            <td data-col="bought" class="text-end price-value">
+                                {% if row.bought_past_month_us or row.bought_past_month_mx %}
+                                    {% if row.bought_past_month_us %}US {{ row.bought_past_month_us }}{% endif %}
+                                    {% if row.bought_past_month_mx %}{% if row.bought_past_month_us %}<br>{% endif %}MX {{ row.bought_past_month_mx }}{% endif %}
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td data-col="rank" class="text-end price-value">
+                                {% if row.sales_rank_us or row.sales_rank_mx %}
+                                    {% if row.sales_rank_us %}US {{ row.sales_rank_us }}{% endif %}
+                                    {% if row.sales_rank_mx %}{% if row.sales_rank_us %}<br>{% endif %}MX {{ row.sales_rank_mx }}{% endif %}
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
                             </td>
                             <td data-col="precio-mx" class="text-end price-value">
                                 {% if row.precio_mx %}
