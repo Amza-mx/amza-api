@@ -11,6 +11,7 @@ Handles all interactions with Keepa API including:
 
 import time
 import json
+import math
 import numpy as np
 from datetime import datetime, date, time as dt_time
 from decimal import Decimal
@@ -62,9 +63,28 @@ class KeepaService:
         # First pass: handle numpy arrays and recurse through structures
         def first_pass(value):
             if isinstance(value, np.ndarray):
-                return value.tolist()
+                return first_pass(value.tolist())
             elif isinstance(value, (np.integer, np.floating)):
+                if isinstance(value, np.floating) and (np.isnan(value) or np.isinf(value)):
+                    return None
                 return value.item()
+            elif isinstance(value, float):
+                return None if math.isnan(value) or math.isinf(value) else value
+            elif isinstance(value, (bytes, bytearray)):
+                try:
+                    return value.decode('utf-8', errors='ignore')
+                except Exception:
+                    return str(value)
+            elif value.__class__.__name__ == 'DataFrame' and value.__class__.__module__.startswith('pandas'):
+                try:
+                    return first_pass(value.to_dict(orient='list'))
+                except Exception:
+                    return {}
+            elif value.__class__.__name__ == 'Series' and value.__class__.__module__.startswith('pandas'):
+                try:
+                    return first_pass(value.to_list())
+                except Exception:
+                    return []
             elif isinstance(value, dict):
                 return {k: first_pass(v) for k, v in value.items()}
             elif isinstance(value, (list, tuple)):
@@ -82,7 +102,7 @@ class KeepaService:
 
         # Second pass: use DjangoJSONEncoder to handle datetime and convert back
         try:
-            json_str = json.dumps(converted, cls=DjangoJSONEncoder)
+            json_str = json.dumps(converted, cls=DjangoJSONEncoder, allow_nan=False)
             return json.loads(json_str)
         except (TypeError, ValueError) as e:
             # If still failing, log and return minimal payload
@@ -142,8 +162,8 @@ class KeepaService:
         domain_id = self.MARKETPLACE_DOMAINS.get(marketplace, 1)
 
         try:
-            # Make API call with buybox=True to get Buy Box data
-            products = self.api.query(asin, domain=domain_id, buybox=True)
+            # Make API call with buybox=True to get Buy Box data and stats for last 30 days
+            products = self.api.query(asin, domain=domain_id, buybox=True, stats=30)
 
             execution_time_ms = int((time.time() - start_time) * 1000)
 

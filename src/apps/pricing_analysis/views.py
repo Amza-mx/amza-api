@@ -79,6 +79,17 @@ def _get_first_image_url(analysis: PricingAnalysisResult) -> str:
     return f'https://images-na.ssl-images-amazon.com/images/I/{first}'
 
 
+def _get_stat_value(raw_data: dict, keys: list[str]):
+    if not raw_data:
+        return None
+    stats = raw_data.get('stats', {})
+    for key in keys:
+        value = stats.get(key)
+        if value not in (None, '', 0):
+            return value
+    return None
+
+
 class PricingAnalysisPanoramaView(LoginRequiredMixin, ListView):
     """
     Vista panoramica para revisar analisis en forma de tabla.
@@ -167,20 +178,28 @@ class PricingAnalysisPanoramaView(LoginRequiredMixin, ListView):
                 margen_neto_actual = (utilidad_neta_actual / current_price * Decimal('100')).quantize(Decimal('0.01'))
 
             mx_bought = (
-                analysis.mx_keepa_data.raw_data.get('stats', {}).get('buyBoxCount')
+                _get_stat_value(analysis.mx_keepa_data.raw_data, ['buyBoxCount', 'buyBoxCount30'])
                 if analysis.mx_keepa_data and analysis.mx_keepa_data.raw_data else None
             )
             mx_rank = analysis.mx_keepa_data.sales_rank if analysis.mx_keepa_data else None
+            mx_drops = (
+                _get_stat_value(analysis.mx_keepa_data.raw_data, ['drops30', 'drops30d', 'drops_30'])
+                if analysis.mx_keepa_data and analysis.mx_keepa_data.raw_data else None
+            )
 
             rows.append({
                 'id': analysis.id,
                 'asin': analysis.asin,
                 'detail_url': reverse('pricing_analysis:result_detail', args=[analysis.pk]),
                 'image_url': image_url,
-                'bought_past_month_us': analysis.usa_keepa_data.raw_data.get('stats', {}).get('buyBoxCount') if analysis.usa_keepa_data and analysis.usa_keepa_data.raw_data else None,
+                'brand': analysis.usa_keepa_data.brand if analysis.usa_keepa_data else None,
+                'category': analysis.usa_keepa_data.product_category if analysis.usa_keepa_data else None,
+                'bought_past_month_us': _get_stat_value(analysis.usa_keepa_data.raw_data, ['buyBoxCount', 'buyBoxCount30']) if analysis.usa_keepa_data and analysis.usa_keepa_data.raw_data else None,
                 'sales_rank_us': analysis.usa_keepa_data.sales_rank if analysis.usa_keepa_data else None,
                 'bought_past_month_mx': mx_bought,
                 'sales_rank_mx': mx_rank,
+                'drops_30_us': _get_stat_value(analysis.usa_keepa_data.raw_data, ['drops30', 'drops30d', 'drops_30']) if analysis.usa_keepa_data and analysis.usa_keepa_data.raw_data else None,
+                'drops_30_mx': mx_drops,
                 'precio_mx': analysis.current_mx_amazon_price.amount if analysis.current_mx_amazon_price else None,
                 'precio_usa_usd': analysis.usa_cost.amount if analysis.usa_cost else None,
                 'taxes': import_taxes_usd,
@@ -385,18 +404,22 @@ class PricingAnalysisResultDetailView(LoginRequiredMixin, DetailView):
         context['brand_status'] = _get_brand_status(analysis)
         context['image_url'] = _get_first_image_url(analysis)
         context['bought_past_month_us'] = (
-            analysis.usa_keepa_data.raw_data.get('stats', {}).get('buyBoxCount')
+            _get_stat_value(analysis.usa_keepa_data.raw_data, ['buyBoxCount', 'buyBoxCount30'])
             if analysis.usa_keepa_data and analysis.usa_keepa_data.raw_data else None
         )
         context['sales_rank_us'] = analysis.usa_keepa_data.sales_rank if analysis.usa_keepa_data else None
         context['bought_past_month_mx'] = (
-            analysis.mx_keepa_data.raw_data.get('stats', {}).get('buyBoxCount')
+            _get_stat_value(analysis.mx_keepa_data.raw_data, ['buyBoxCount', 'buyBoxCount30'])
             if analysis.mx_keepa_data and analysis.mx_keepa_data.raw_data else None
         )
         context['sales_rank_mx'] = analysis.mx_keepa_data.sales_rank if analysis.mx_keepa_data else None
-        context['bought_past_month'] = (
-            analysis.usa_keepa_data.raw_data.get('stats', {}).get('buyBoxCount')
+        context['drops_30_us'] = (
+            _get_stat_value(analysis.usa_keepa_data.raw_data, ['drops30', 'drops30d', 'drops_30'])
             if analysis.usa_keepa_data and analysis.usa_keepa_data.raw_data else None
+        )
+        context['drops_30_mx'] = (
+            _get_stat_value(analysis.mx_keepa_data.raw_data, ['drops30', 'drops30d', 'drops_30'])
+            if analysis.mx_keepa_data and analysis.mx_keepa_data.raw_data else None
         )
         context['sales_rank'] = analysis.usa_keepa_data.sales_rank if analysis.usa_keepa_data else None
 

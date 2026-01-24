@@ -69,12 +69,36 @@
                                     <label class="form-check-label">ASIN</label>
                                 </div>
                                 <div class="col-toggle-item">
-                                    <input class="form-check-input" type="checkbox" data-col-toggle="bought" checked>
-                                    <label class="form-check-label">Bought in past month</label>
+                                    <input class="form-check-input" type="checkbox" data-col-toggle="brand" checked>
+                                    <label class="form-check-label">Brand</label>
                                 </div>
                                 <div class="col-toggle-item">
-                                    <input class="form-check-input" type="checkbox" data-col-toggle="rank" checked>
-                                    <label class="form-check-label">Sales Rank</label>
+                                    <input class="form-check-input" type="checkbox" data-col-toggle="category" checked>
+                                    <label class="form-check-label">Category</label>
+                                </div>
+                                <div class="col-toggle-item">
+                                    <input class="form-check-input" type="checkbox" data-col-toggle="bought-us" checked>
+                                    <label class="form-check-label">Bought US</label>
+                                </div>
+                                <div class="col-toggle-item">
+                                    <input class="form-check-input" type="checkbox" data-col-toggle="bought-mx" checked>
+                                    <label class="form-check-label">Bought MX</label>
+                                </div>
+                                <div class="col-toggle-item">
+                                    <input class="form-check-input" type="checkbox" data-col-toggle="drops-us" checked>
+                                    <label class="form-check-label">Drops 30d US</label>
+                                </div>
+                                <div class="col-toggle-item">
+                                    <input class="form-check-input" type="checkbox" data-col-toggle="drops-mx" checked>
+                                    <label class="form-check-label">Drops 30d MX</label>
+                                </div>
+                                <div class="col-toggle-item">
+                                    <input class="form-check-input" type="checkbox" data-col-toggle="rank-us" checked>
+                                    <label class="form-check-label">Sales Rank US</label>
+                                </div>
+                                <div class="col-toggle-item">
+                                    <input class="form-check-input" type="checkbox" data-col-toggle="rank-mx" checked>
+                                    <label class="form-check-label">Sales Rank MX</label>
                                 </div>
                                 <div class="col-toggle-item">
                                     <input class="form-check-input" type="checkbox" data-col-toggle="precio-mx" checked>
@@ -130,9 +154,15 @@
                             </div>
                         </div>
                     </div>
-                    <span class="badge bg-success">Vendible</span>
-                    <span class="badge bg-danger">No vendible</span>
-                    <span class="badge bg-warning text-dark">No disponible USA</span>
+                    <button class="btn btn-success btn-sm" type="button" data-filter="vendible">
+                        Vendible
+                    </button>
+                    <button class="btn btn-danger btn-sm" type="button" data-filter="no-vendible">
+                        No vendible
+                    </button>
+                    <button class="btn btn-warning btn-sm text-dark" type="button" data-filter="no-disponible">
+                        No disponible USA
+                    </button>
                 </div>
             </div>
         </div>
@@ -142,8 +172,14 @@
                     <thead>
                         <tr>
                             <th data-col="asin">ASIN</th>
-                            <th data-col="bought">Bought (US/MX)</th>
-                            <th data-col="rank">Sales Rank (US/MX)</th>
+                            <th data-col="brand">Brand</th>
+                            <th data-col="category">Category</th>
+                            <th data-col="bought-us">Bought US</th>
+                            <th data-col="bought-mx">Bought MX</th>
+                            <th data-col="drops-us">Drops 30d US</th>
+                            <th data-col="drops-mx">Drops 30d MX</th>
+                            <th data-col="rank-us">Sales Rank US</th>
+                            <th data-col="rank-mx">Sales Rank MX</th>
                             <th data-col="precio-mx">Precio en MEX</th>
                             <th data-col="precio-usa-usd">Precio en USA (USD)</th>
                             <th data-col="taxes">TAXES (USD)</th>
@@ -161,7 +197,7 @@
                     </thead>
                     <tbody>
                         {% for row in rows %}
-                        <tr class="{% if row.vendible %}table-success{% elif not row.disponible_usa %}table-warning{% else %}table-danger{% endif %}">
+                        <tr class="{% if row.vendible %}table-success row-vendible{% elif not row.disponible_usa %}table-warning row-no-disponible{% else %}table-danger row-no-vendible{% endif %}">
                             <td data-col="asin">
                                 <div class="d-flex align-items-center gap-2">
                                     {% if row.image_url %}
@@ -179,18 +215,58 @@
                                     </a>
                                 </div>
                             </td>
-                            <td data-col="bought" class="text-end price-value">
-                                {% if row.bought_past_month_us or row.bought_past_month_mx %}
-                                    {% if row.bought_past_month_us %}US {{ row.bought_past_month_us }}{% endif %}
-                                    {% if row.bought_past_month_mx %}{% if row.bought_past_month_us %}<br>{% endif %}MX {{ row.bought_past_month_mx }}{% endif %}
+                            <td data-col="brand">
+                                {% if row.brand %}
+                                    {{ row.brand }}
                                 {% else %}
                                     <span class="text-muted">-</span>
                                 {% endif %}
                             </td>
-                            <td data-col="rank" class="text-end price-value">
-                                {% if row.sales_rank_us or row.sales_rank_mx %}
-                                    {% if row.sales_rank_us %}US {{ row.sales_rank_us }}{% endif %}
-                                    {% if row.sales_rank_mx %}{% if row.sales_rank_us %}<br>{% endif %}MX {{ row.sales_rank_mx }}{% endif %}
+                            <td data-col="category">
+                                {% if row.category %}
+                                    {{ row.category }}
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td data-col="bought-us" class="text-end price-value">
+                                {% if row.bought_past_month_us %}
+                                    {{ row.bought_past_month_us }}
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td data-col="bought-mx" class="text-end price-value">
+                                {% if row.bought_past_month_mx %}
+                                    {{ row.bought_past_month_mx }}
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td data-col="drops-us" class="text-end price-value">
+                                {% if row.drops_30_us %}
+                                    {{ row.drops_30_us }}
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td data-col="drops-mx" class="text-end price-value">
+                                {% if row.drops_30_mx %}
+                                    {{ row.drops_30_mx }}
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td data-col="rank-us" class="text-end price-value">
+                                {% if row.sales_rank_us %}
+                                    {{ row.sales_rank_us }}
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td data-col="rank-mx" class="text-end price-value">
+                                {% if row.sales_rank_mx %}
+                                    {{ row.sales_rank_mx }}
                                 {% else %}
                                     <span class="text-muted">-</span>
                                 {% endif %}
@@ -329,6 +405,8 @@
 document.addEventListener('DOMContentLoaded', function() {
     const storageKey = 'panorama-columns';
     const toggles = document.querySelectorAll('[data-col-toggle]');
+    const filterButtons = document.querySelectorAll('[data-filter]');
+    let activeFilter = null;
 
     function setColumnVisibility(col, isVisible) {
         document.querySelectorAll('[data-col="' + col + '"]').forEach(function(cell) {
@@ -365,6 +443,44 @@ document.addEventListener('DOMContentLoaded', function() {
             const col = toggle.getAttribute('data-col-toggle');
             setColumnVisibility(col, toggle.checked);
             localStorage.setItem(storageKey, JSON.stringify(getSelectedColumns()));
+        });
+    });
+
+    function applyFilter(filter) {
+        document.querySelectorAll('tbody tr').forEach(function(row) {
+            const isVendible = row.classList.contains('row-vendible');
+            const isNoVendible = row.classList.contains('row-no-vendible');
+            const isNoDisponible = row.classList.contains('row-no-disponible');
+
+            let show = true;
+            if (filter === 'vendible') {
+                show = isVendible;
+            } else if (filter === 'no-vendible') {
+                show = isNoVendible;
+            } else if (filter === 'no-disponible') {
+                show = isNoDisponible;
+            }
+
+            row.classList.toggle('d-none', !show);
+        });
+    }
+
+    filterButtons.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            const filter = btn.getAttribute('data-filter');
+            if (activeFilter === filter) {
+                activeFilter = null;
+                filterButtons.forEach(function(b) { b.classList.remove('active'); });
+                document.querySelectorAll('tbody tr').forEach(function(row) {
+                    row.classList.remove('d-none');
+                });
+                return;
+            }
+
+            activeFilter = filter;
+            filterButtons.forEach(function(b) { b.classList.remove('active'); });
+            btn.classList.add('active');
+            applyFilter(filter);
         });
     });
 });
