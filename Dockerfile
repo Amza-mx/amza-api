@@ -16,6 +16,10 @@ COPY etc/requirements/ ./etc/requirements/
 # Install production dependencies with pip
 RUN pip install --no-cache-dir -r etc/requirements/prod.txt
 
+# Copy entrypoint and set permissions before copying app code
+COPY entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
+
 # Copy application code
 COPY . .
 
@@ -24,10 +28,6 @@ WORKDIR /app/src
 
 # Expose port
 EXPOSE 8000
-
-# Copy and set executable permission for entrypoint
-COPY entrypoint.sh /app/entrypoint.sh
-RUN chmod +x /app/entrypoint.sh
 
 # Use entrypoint script
 CMD ["/app/entrypoint.sh"]
