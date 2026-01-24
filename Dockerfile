@@ -1,4 +1,4 @@
-# Use Python 3.13 (matches uv.lock requirement: requires-python = ">=3.13")
+# Use Python 3.13 (matches project requirement: requires-python = ">=3.13")
 FROM python:3.13-slim
 
 # Set environment variables
@@ -7,18 +7,13 @@ ENV PYTHONUNBUFFERED=1 \
     PORT=8000 \
     PYTHONPATH=/app/src
 
-# Install uv package manager
-RUN pip install --no-cache-dir uv
-
 # Set working directory
 WORKDIR /app
 
 # Copy dependency files
-COPY pyproject.toml uv.lock ./
 COPY etc/requirements/ ./etc/requirements/
 
 # Install production dependencies with pip
-# Note: Using requirements files since uv.lock only has revision info
 RUN pip install --no-cache-dir -r etc/requirements/prod.txt
 
 # Copy application code
