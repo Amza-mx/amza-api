@@ -1,7 +1,7 @@
 -r base.txt
 
-# PostgreSQL adapter for production
-psycopg[binary]==3.1.18
+# PostgreSQL adapter for production (compatible with Python 3.13)
+psycopg[binary]==3.3.2
 
 # Production WSGI server
 gunicorn==21.2.0
