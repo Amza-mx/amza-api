@@ -40,46 +40,53 @@ class PricingCalculatorTest(TestCase):
         self.assertIn('usa_cost_mxn', result)
         self.assertIn('after_import', result)
         self.assertIn('cost_base', result)
+        self.assertIn('break_even_base', result)
+        self.assertIn('retention_factor', result)
         self.assertIn('vat_retention', result)
         self.assertIn('isr_retention', result)
         self.assertIn('break_even_price', result)
 
         # Verify calculations
-        # USA cost in MXN: 12.50 * 20 = 250
-        self.assertEqual(result['usa_cost_mxn'], Decimal('250.00'))
+        # USA cost in MXN: 12.50 * 20 * 1.0825 = 270.625
+        self.assertEqual(result['usa_cost_mxn'], Decimal('270.62'))
 
-        # After import: 250 * 1.20 = 300
-        self.assertEqual(result['after_import'], Decimal('300.00'))
+        # After import: (270.625 * 0.20) + IVA 16% = 62.785
+        self.assertEqual(result['after_import'], Decimal('62.78'))
 
-        # Cost base: 300 * 1.16 = 348
-        self.assertEqual(result['cost_base'], Decimal('348.00'))
+        # Cost base: 270.625 + 62.785 = 333.41
+        self.assertEqual(result['cost_base'], Decimal('333.41'))
 
-        # VAT retention: 348 * 0.08 = 27.84
-        self.assertEqual(result['vat_retention'], Decimal('27.84'))
+        # Break even base: 418.41 / 0.85 = 492.25
+        self.assertEqual(result['break_even_base'], Decimal('492.25'))
 
-        # ISR retention: 348 * 0.025 = 8.70
-        self.assertEqual(result['isr_retention'], Decimal('8.70'))
+        # Retention factor: (0.08 + 0.025) / 1.16 = 0.0905172
+        self.assertEqual(result['retention_factor'], Decimal('0.0905172'))
 
-        # Total costs: 348 + 85 + 27.84 + 8.70 = 469.54
-        # Break even: 469.54 / 0.85 = 552.40
-        self.assertEqual(result['break_even_price'], Decimal('552.40'))
+        # VAT retention (BE): 541.24 / 1.16 * 0.08 = 37.33
+        self.assertEqual(result['vat_retention'], Decimal('37.33'))
+
+        # ISR retention (BE): 541.24 / 1.16 * 0.025 = 11.66
+        self.assertEqual(result['isr_retention'], Decimal('11.66'))
+
+        # Break even final: 492.25 / (1 - 0.0905172) = 541.24
+        self.assertEqual(result['break_even_price'], Decimal('541.24'))
 
     def test_calculate_recommended_price(self):
         """Test recommended price calculation."""
-        break_even = Decimal('552.40')
+        break_even = Decimal('541.24')
         target_margin = Decimal('0.25')
 
         recommended = self.calculator.calculate_recommended_price(
-            break_even=break_even,
+            break_even_price=break_even,
             target_margin=target_margin
         )
 
-        # Recommended: 552.40 / 0.75 = 736.53
-        self.assertEqual(recommended, Decimal('736.53'))
+        # Recommended: 541.24 * 1.25 = 676.55
+        self.assertEqual(recommended, Decimal('676.55'))
 
     def test_analyze_competitiveness_feasible(self):
         """Test competitiveness analysis for feasible product."""
-        break_even = Decimal('552.40')
+        break_even = Decimal('541.24')
         current_price = Decimal('699.00')
 
         result = self.calculator.analyze_competitiveness(
@@ -89,12 +96,12 @@ class PricingCalculatorTest(TestCase):
         )
 
         self.assertTrue(result['is_feasible'])
-        self.assertEqual(result['price_difference'], Decimal('146.60'))
+        self.assertEqual(result['price_difference'], Decimal('157.76'))
         self.assertTrue(result['meets_min_margin'])
 
     def test_analyze_competitiveness_not_feasible(self):
         """Test competitiveness analysis for non-feasible product."""
-        break_even = Decimal('552.40')
+        break_even = Decimal('541.24')
         current_price = Decimal('500.00')
 
         result = self.calculator.analyze_competitiveness(

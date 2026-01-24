@@ -1,0 +1,334 @@
+{% extends "pricing_analysis/base.html" %}
+
+{% block title %}Vista Panoramica{% endblock %}
+
+{% block extra_head %}
+<style>
+.panorama-card {
+    border-radius: 0.75rem;
+}
+
+.panorama-header {
+    background: linear-gradient(135deg, #212529 0%, #343a40 100%);
+}
+
+.panorama-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background-color: #212529;
+    color: #fff;
+}
+
+.panorama-table tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+.panorama-table td,
+.panorama-table th {
+    white-space: nowrap;
+}
+
+.panorama-scroll {
+    max-height: 70vh;
+}
+
+.col-toggle-menu {
+    min-width: 280px;
+}
+
+.col-toggle-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="card shadow-sm panorama-card mb-4">
+        <div class="card-header text-white panorama-header">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                <div>
+                    <h4 class="mb-1">
+                        <i class="bi bi-table"></i> Vista Panoramica
+                    </h4>
+                    <small class="text-white-50">
+                        Tabla dinamica para decisiones rapidas. Total: {{ rows|length }} analisis.
+                    </small>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <div class="dropdown">
+                        <button class="btn btn-outline-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-layout-three-columns"></i> Columnas
+                        </button>
+                        <div class="dropdown-menu p-3 col-toggle-menu">
+                            <div class="col-toggle-item">
+                                <input class="form-check-input" type="checkbox" data-col-toggle="asin" checked>
+                                <label class="form-check-label">ASIN</label>
+                            </div>
+                            <div class="col-toggle-item">
+                                <input class="form-check-input" type="checkbox" data-col-toggle="precio-mx" checked>
+                                <label class="form-check-label">Precio en MEX</label>
+                            </div>
+                            <div class="col-toggle-item">
+                                <input class="form-check-input" type="checkbox" data-col-toggle="precio-usa-usd" checked>
+                                <label class="form-check-label">Precio en USA (USD)</label>
+                            </div>
+                            <div class="col-toggle-item">
+                                <input class="form-check-input" type="checkbox" data-col-toggle="taxes" checked>
+                                <label class="form-check-label">TAXES</label>
+                            </div>
+                            <div class="col-toggle-item">
+                                <input class="form-check-input" type="checkbox" data-col-toggle="tc" checked>
+                                <label class="form-check-label">TC</label>
+                            </div>
+                            <div class="col-toggle-item">
+                                <input class="form-check-input" type="checkbox" data-col-toggle="be" checked>
+                                <label class="form-check-label">BE</label>
+                            </div>
+                            <div class="col-toggle-item">
+                                <input class="form-check-input" type="checkbox" data-col-toggle="precio-usa-mxn" checked>
+                                <label class="form-check-label">Precio USA (MXN)</label>
+                            </div>
+                            <div class="col-toggle-item">
+                                <input class="form-check-input" type="checkbox" data-col-toggle="importacion" checked>
+                                <label class="form-check-label">Importacion</label>
+                            </div>
+                            <div class="col-toggle-item">
+                                <input class="form-check-input" type="checkbox" data-col-toggle="envio" checked>
+                                <label class="form-check-label">Envio a Cliente</label>
+                            </div>
+                            <div class="col-toggle-item">
+                                <input class="form-check-input" type="checkbox" data-col-toggle="retenciones" checked>
+                                <label class="form-check-label">Retenciones</label>
+                            </div>
+                            <div class="col-toggle-item">
+                                <input class="form-check-input" type="checkbox" data-col-toggle="vendible" checked>
+                                <label class="form-check-label">Vendible</label>
+                            </div>
+                            <div class="col-toggle-item">
+                                <input class="form-check-input" type="checkbox" data-col-toggle="margen" checked>
+                                <label class="form-check-label">Margen</label>
+                            </div>
+                            <div class="col-toggle-item">
+                                <input class="form-check-input" type="checkbox" data-col-toggle="precio-min" checked>
+                                <label class="form-check-label">Precio Minimo</label>
+                            </div>
+                            <div class="col-toggle-item">
+                                <input class="form-check-input" type="checkbox" data-col-toggle="precio-max" checked>
+                                <label class="form-check-label">Precio Maximo</label>
+                            </div>
+                        </div>
+                    </div>
+                    <span class="badge bg-success">Vendible</span>
+                    <span class="badge bg-danger">No vendible</span>
+                    <span class="badge bg-warning text-dark">No disponible USA</span>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive panorama-scroll">
+                <table class="table table-hover align-middle panorama-table">
+                    <thead>
+                        <tr>
+                            <th data-col="asin">ASIN</th>
+                            <th data-col="precio-mx">Precio en MEX</th>
+                            <th data-col="precio-usa-usd">Precio en USA (USD)</th>
+                            <th data-col="taxes">TAXES (USD)</th>
+                            <th data-col="tc">TC</th>
+                            <th data-col="be">BE</th>
+                            <th data-col="precio-usa-mxn">Precio USA (MXN)</th>
+                            <th data-col="importacion">Importacion</th>
+                            <th data-col="envio">Envio a Cliente</th>
+                            <th data-col="retenciones">Retenciones</th>
+                            <th data-col="vendible">Vendible</th>
+                            <th data-col="margen">Margen</th>
+                            <th data-col="precio-min">Precio Minimo</th>
+                            <th data-col="precio-max">Precio Maximo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in rows %}
+                        <tr class="{% if row.vendible %}table-success{% elif not row.disponible_usa %}table-warning{% else %}table-danger{% endif %}">
+                            <td data-col="asin">
+                                <a class="fw-semibold text-decoration-none" href="{{ row.detail_url }}">
+                                    {{ row.asin }}
+                                </a>
+                            </td>
+                            <td data-col="precio-mx" class="text-end price-value">
+                                {% if row.precio_mx %}
+                                    ${{ row.precio_mx|floatformat:2 }} MXN
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td data-col="precio-usa-usd" class="text-end price-value">
+                                {% if row.precio_usa_usd %}
+                                    ${{ row.precio_usa_usd|floatformat:2 }} USD
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td data-col="taxes" class="text-end price-value">
+                                {% if row.taxes %}
+                                    ${{ row.taxes|floatformat:2 }} USD
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td data-col="tc" class="text-end price-value">
+                                {% if row.tc %}
+                                    {{ row.tc|floatformat:4 }}
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td data-col="be" class="text-end price-value">
+                                {% if row.be %}
+                                    ${{ row.be|floatformat:2 }} MXN
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td data-col="precio-usa-mxn" class="text-end price-value">
+                                {% if row.precio_usa_mxn %}
+                                    ${{ row.precio_usa_mxn|floatformat:2 }} MXN
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td data-col="importacion" class="text-end price-value">
+                                {% if row.importacion %}
+                                    ${{ row.importacion|floatformat:2 }} MXN
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td data-col="envio" class="text-end price-value">
+                                {% if row.envio %}
+                                    ${{ row.envio|floatformat:2 }} MXN
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td data-col="retenciones" class="text-end price-value">
+                                {% if row.retenciones_actual %}
+                                    <div>- ${{ row.retenciones_actual|floatformat:2 }} MXN</div>
+                                {% else %}
+                                    <div class="text-muted">-</div>
+                                {% endif %}
+                                {% if row.retenciones_min %}
+                                    <small class="text-muted">Min: -${{ row.retenciones_min|floatformat:2 }}</small><br>
+                                {% endif %}
+                                {% if row.retenciones_max %}
+                                    <small class="text-muted">Max: -${{ row.retenciones_max|floatformat:2 }}</small>
+                                {% endif %}
+                            </td>
+                            <td data-col="vendible">
+                                {% if row.brand_blocked %}
+                                    <span class="badge bg-danger">Marca bloqueada</span>
+                                {% elif not row.disponible_usa %}
+                                    <span class="badge bg-warning text-dark">No disponible USA</span>
+                                {% elif row.vendible %}
+                                    <span class="badge bg-success">Vendible</span>
+                                {% else %}
+                                    <span class="badge bg-danger">No vendible</span>
+                                {% endif %}
+                            </td>
+                            <td data-col="margen" class="text-end">
+                                {% if row.margen_pct %}
+                                    <span class="badge {% if row.margen_pct >= 10 %}bg-success{% else %}bg-danger{% endif %}">
+                                        {{ row.margen_pct|floatformat:2 }}%
+                                    </span>
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                                {% if row.margen_neto_actual %}
+                                    <div class="text-muted small mt-1">
+                                        Margen neto: {{ row.margen_neto_actual|floatformat:2 }}%
+                                    </div>
+                                {% endif %}
+                                {% if row.utilidad_neta_actual %}
+                                    <div class="text-muted small">
+                                        Util neta: ${{ row.utilidad_neta_actual|floatformat:2 }}
+                                    </div>
+                                {% endif %}
+                            </td>
+                            <td data-col="precio-min" class="text-end price-value">
+                                {% if row.precio_minimo %}
+                                    ${{ row.precio_minimo|floatformat:2 }} MXN
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td data-col="precio-max" class="text-end price-value">
+                                {% if row.precio_maximo %}
+                                    ${{ row.precio_maximo|floatformat:2 }} MXN
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="14" class="text-center text-muted py-4">
+                                No hay analisis disponibles.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const storageKey = 'panorama-columns';
+    const toggles = document.querySelectorAll('[data-col-toggle]');
+
+    function setColumnVisibility(col, isVisible) {
+        document.querySelectorAll('[data-col="' + col + '"]').forEach(function(cell) {
+            cell.classList.toggle('d-none', !isVisible);
+        });
+    }
+
+    function getSelectedColumns() {
+        const selected = [];
+        toggles.forEach(function(toggle) {
+            if (toggle.checked) {
+                selected.push(toggle.getAttribute('data-col-toggle'));
+            }
+        });
+        return selected;
+    }
+
+    const saved = localStorage.getItem(storageKey);
+    if (saved) {
+        try {
+            const selected = JSON.parse(saved);
+            toggles.forEach(function(toggle) {
+                const col = toggle.getAttribute('data-col-toggle');
+                toggle.checked = selected.includes(col);
+                setColumnVisibility(col, toggle.checked);
+            });
+        } catch (error) {
+            localStorage.removeItem(storageKey);
+        }
+    }
+
+    toggles.forEach(function(toggle) {
+        toggle.addEventListener('change', function() {
+            const col = toggle.getAttribute('data-col-toggle');
+            setColumnVisibility(col, toggle.checked);
+            localStorage.setItem(storageKey, JSON.stringify(getSelectedColumns()));
+        });
+    });
+});
+</script>
+{% endblock %}

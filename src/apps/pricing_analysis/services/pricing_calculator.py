@@ -19,21 +19,13 @@ Implements the Break Even calculation formula:
 6. Break_Even_Base = Total_Costs / (1 - Marketplace_Fee_Rate)
    (donde Marketplace_Fee_Rate = 0.15 para Amazon)
 
-7. VAT_Retention = (Cost_MX / 1.16) * 0.08
-   ISR_Retention = (Cost_MX / 1.16) * 0.025
+7. Retention_Factor = (VAT_Rate + ISR_Rate) / (1 + IVA_Rate)
 
-8. Break_Even_Final = Break_Even_Base + VAT_Retention + ISR_Retention
-
-Donde:
-- USA_Cost_USD: Precio de compra del producto en USA (obtenido de Keepa)
-- Exchange_Rate: Tipo de cambio USD→MXN actual
-- Cost_MX: Precio de venta del producto (puede ser el precio de Amazon MX u otro precio establecido)
-- Shipping_Cost_MXN: Costo de envío ($70-$100 MXN promedio)
+8. Break_Even_Final = Break_Even_Base / (1 - Retention_Factor)
 """
 
 from decimal import Decimal
 from typing import Dict, Any
-from djmoney.money import Money
 
 
 class PricingCalculator:
@@ -42,21 +34,20 @@ class PricingCalculator:
     @staticmethod
     def calculate_break_even(
         usa_cost_usd: Decimal,
-        cost_mx: Decimal,
         exchange_rate: Decimal,
         shipping_cost_mxn: Decimal,
-        config: 'BreakEvenAnalysisConfig'
+        config: 'BreakEvenAnalysisConfig',
+        usa_tax_multiplier: Decimal = Decimal('1.0825')
     ) -> Dict[str, Decimal]:
         """
         Calculate Break Even price based on USA cost and config parameters.
 
         Args:
             usa_cost_usd: Precio de compra del producto en USD (obtenido de Keepa)
-            cost_mx: Precio de venta del producto en MXN (puede ser el precio de Amazon MX
-                     u otro precio establecido)
             exchange_rate: USD to MXN exchange rate
             shipping_cost_mxn: Shipping cost in MXN
             config: Analysis configuration with tax rates
+            usa_tax_multiplier: Tax multiplier for USA cost (default 1.0825)
 
         Returns:
             Dictionary with all calculation steps:
@@ -64,19 +55,19 @@ class PricingCalculator:
                 'usa_cost_mxn': Decimal,
                 'after_import': Decimal,
                 'cost_base': Decimal,
+                'total_costs': Decimal,
+                'break_even_base': Decimal,
+                'retention_factor': Decimal,
                 'vat_retention': Decimal,
                 'isr_retention': Decimal,
-                'total_costs': Decimal,
                 'break_even_price': Decimal
             }
         """
         # Convert USA cost to MXN
         usa_cost_mxn = usa_cost_usd * exchange_rate
 
-        IMPUESTOS_AMERICANOS = Decimal('1.0825')
-
         # $1,000
-        usa_cost_mxn = usa_cost_mxn * IMPUESTOS_AMERICANOS
+        usa_cost_mxn = usa_cost_mxn * usa_tax_multiplier
 
         # $200
         # Apply import administrative costs (20%)
@@ -92,46 +83,63 @@ class PricingCalculator:
         # $1,232.00
         cost_base = usa_cost_mxn + after_import
 
-        # Calculate retentions
-        costo_venta_base = cost_mx / (Decimal('1') + config.iva_tax_rate)
-        vat_retention = costo_venta_base * config.vat_retention_rate
-        isr_retention = costo_venta_base * config.isr_retention_rate
-
         # Total costs
         # $469.20 + $85 = $554.21
         total_costs = cost_base + shipping_cost_mxn
 
-
         # Break Even (divide by (1 - marketplace_fee_rate) to account for 15% fee)
-        break_even_price = total_costs / (Decimal('1') - config.marketplace_fee_rate)
-        break_even_price = break_even_price + vat_retention + isr_retention
+        marketplace_factor = (Decimal('1') - config.marketplace_fee_rate)
+        if marketplace_factor <= 0:
+            raise ValueError("marketplace_fee_rate must be < 1")
+
+        break_even_base = total_costs / marketplace_factor
+
+        retention_rates_sum = config.vat_retention_rate + config.isr_retention_rate
+        iva_factor = (Decimal('1') + config.iva_tax_rate)
+        if iva_factor <= 0:
+            raise ValueError("iva_tax_rate must be > -1")
+
+        retention_factor = retention_rates_sum / iva_factor
+        denom = (Decimal('1') - retention_factor)
+        if denom <= 0:
+            raise ValueError("Invalid config: retentions are too high vs IVA (denom <= 0)")
+
+        break_even_price = break_even_base / denom
+        net_price = break_even_price / iva_factor
+        vat_retention = net_price * config.vat_retention_rate
+        isr_retention = net_price * config.isr_retention_rate
 
         return {
             'usa_cost_mxn': usa_cost_mxn.quantize(Decimal('0.01')),
             'after_import': after_import.quantize(Decimal('0.01')),
             'cost_base': cost_base.quantize(Decimal('0.01')),
+            'total_costs': total_costs.quantize(Decimal('0.01')),
+            'break_even_base': break_even_base.quantize(Decimal('0.01')),
+            'retention_factor': retention_factor.quantize(Decimal('0.0000001')),
             'vat_retention': vat_retention.quantize(Decimal('0.01')),
             'isr_retention': isr_retention.quantize(Decimal('0.01')),
-            'total_costs': total_costs.quantize(Decimal('0.01')),
             'break_even_price': break_even_price.quantize(Decimal('0.01')),
         }
 
     @staticmethod
     def calculate_recommended_price(
-        break_even: Decimal,
+        break_even_price: Decimal,
         target_margin: Decimal
     ) -> Decimal:
         """
-        Calculate recommended selling price based on target profit margin.
+        Calculate recommended price as markup over Break Even (final).
 
         Args:
-            break_even: Break even price
-            target_margin: Target profit margin (e.g., 0.25 for 25%)
+            break_even_price: Break even price including retentions
+            target_margin: Desired margin over BE (e.g., 0.25 for 25%)
 
         Returns:
-            Recommended price with target margin
+            Recommended price with markup over BE
         """
-        recommended = break_even / (Decimal('1') - target_margin)
+        if target_margin < 0:
+            raise ValueError("target_margin must be >= 0")
+
+        recommended = break_even_price * (Decimal('1') + target_margin)
         return recommended.quantize(Decimal('0.01'))
 
     @staticmethod
@@ -169,12 +177,18 @@ class PricingCalculator:
                 'meets_target_margin': False,
             }
 
-        # Calculate price difference
+        # Calculate price difference vs BE
         price_difference = current_mx_price - break_even
 
-        # Calculate potential profit margin
-        if current_mx_price > 0:
-            potential_profit_margin = (price_difference / current_mx_price).quantize(Decimal('0.0001'))
+        # Calculate margin using retentions over current price
+        retention_rates_sum = config.vat_retention_rate + config.isr_retention_rate
+        retention_factor = retention_rates_sum / (Decimal('1') + config.iva_tax_rate)
+        break_even_base = break_even * (Decimal('1') - retention_factor)
+        retenciones_current = current_mx_price * retention_factor
+
+        if break_even_base > 0:
+            profit = current_mx_price - break_even_base - retenciones_current
+            potential_profit_margin = (profit / break_even_base).quantize(Decimal('0.0001'))
         else:
             potential_profit_margin = Decimal('0.0000')
 

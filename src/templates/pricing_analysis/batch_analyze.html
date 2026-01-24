@@ -1,0 +1,43 @@
+{% extends "pricing_analysis/base.html" %}
+
+{% block title %}Analizar ASINs{% endblock %}
+
+{% block content %}
+<div class="container-lg">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">
+                <i class="bi bi-upload"></i> Analizar ASINs
+            </h5>
+        </div>
+        <div class="card-body">
+            {% if error %}
+                <div class="alert alert-danger">
+                    {{ error }}
+                </div>
+            {% endif %}
+
+            <form method="post">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="form-label">Nombre del batch</label>
+                    <input type="text" name="batch_name" class="form-control" value="{{ batch_name|default:'Batch' }}">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">ASINs</label>
+                    <textarea name="asins" class="form-control" rows="8" placeholder="B0CQ1DLNTM&#10;B00FO46A1K">{{ asins }}</textarea>
+                    <div class="form-text">Separar por salto de linea, espacio o coma.</div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Costo de envio (opcional)</label>
+                    <input type="text" name="shipping_cost_mxn" class="form-control" value="{{ shipping_cost_mxn }}">
+                </div>
+
+                <button type="submit" class="btn btn-success">Iniciar analisis</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

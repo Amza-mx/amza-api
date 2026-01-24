@@ -7,6 +7,7 @@ from .models import (
     KeepaConfiguration,
     ExchangeRate,
     KeepaProductData,
+    BrandRestriction,
     BreakEvenAnalysisConfig,
     PricingAnalysisResult,
     PricingAnalysisBatch,
@@ -167,6 +168,21 @@ class KeepaProductDataAdmin(BaseAdmin):
         if obj.title:
             return obj.title[:60] + '...' if len(obj.title) > 60 else obj.title
         return '-'
+
+
+@admin.register(BrandRestriction)
+class BrandRestrictionAdmin(BaseAdmin):
+    list_display = [
+        'id',
+        'name',
+        'normalized_name',
+        'is_allowed',
+        'updated_at',
+    ]
+    list_filter = ['is_allowed']
+    search_fields = ['name', 'normalized_name']
+    readonly_fields = ['normalized_name', 'created_at', 'updated_at']
+    ordering = ['name']
 
 
 @admin.register(BreakEvenAnalysisConfig)

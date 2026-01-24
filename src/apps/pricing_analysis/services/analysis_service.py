@@ -20,6 +20,7 @@ from apps.pricing_analysis.models import (
     BreakEvenAnalysisConfig,
     PricingAnalysisResult,
     PricingAnalysisBatch,
+    BrandRestriction,
 )
 from .keepa_service import KeepaService
 from .pricing_calculator import PricingCalculator
@@ -102,12 +103,13 @@ class PricingAnalysisService:
             mx_current_price = mx_keepa_data.current_new_price
 
         # 8. Calculate Break Even
+        usa_tax_multiplier = self._get_usa_tax_multiplier(usa_keepa_data, usa_keepa_data.product or mx_keepa_data.product)
         breakdown = self.calculator.calculate_break_even(
             usa_cost_usd=usa_cost,
-            cost_mx=mx_current_price,
             exchange_rate=exchange_rate,
             shipping_cost_mxn=shipping_cost_mxn,
-            config=config
+            config=config,
+            usa_tax_multiplier=usa_tax_multiplier
         )
 
         # 9. Analyze competitiveness
@@ -119,9 +121,15 @@ class PricingAnalysisService:
 
         # 10. Calculate recommended price
         recommended_price = self.calculator.calculate_recommended_price(
-            break_even=breakdown['break_even_price'],
+            break_even_price=breakdown['break_even_price'],
             target_margin=config.target_profit_margin
         )
+
+        # 10.5 Brand restriction check
+        brand_status = self._get_brand_status(usa_keepa_data, usa_keepa_data.product or mx_keepa_data.product)
+        if brand_status['is_blocked']:
+            competitiveness['is_feasible'] = False
+            competitiveness['confidence_score'] = 'LOW'
 
         # 11. Generate analysis notes
         analysis_notes = self._generate_analysis_notes(
@@ -132,6 +140,8 @@ class PricingAnalysisService:
             mx_current_price=mx_current_price,
             recommended_price=recommended_price,
         )
+        if brand_status['is_blocked']:
+            analysis_notes = f'⛔ Marca bloqueada: {brand_status["brand"]}\n\n' + analysis_notes
 
         # 12. Create result
         product = usa_keepa_data.product or mx_keepa_data.product
@@ -215,6 +225,37 @@ class PricingAnalysisService:
         )
 
         return result
+
+    def _get_brand_status(self, usa_keepa_data, product) -> dict:
+        brand = ''
+        if usa_keepa_data and usa_keepa_data.brand:
+            brand = usa_keepa_data.brand
+        elif product and getattr(product, 'brand', None):
+            brand = product.brand
+
+        normalized = (brand or '').strip().lower()
+        if not normalized:
+            return {'brand': '', 'is_blocked': False}
+
+        restriction = BrandRestriction.objects.filter(normalized_name=normalized).first()
+        if restriction is None:
+            return {'brand': brand, 'is_blocked': False}
+
+        return {'brand': brand, 'is_blocked': not restriction.is_allowed}
+
+    def _get_usa_tax_multiplier(self, usa_keepa_data, product) -> Decimal:
+        """Return USA tax multiplier based on category rules."""
+        category = ''
+        if usa_keepa_data and usa_keepa_data.product_category:
+            category = usa_keepa_data.product_category
+        elif product and getattr(product, 'category', None):
+            category = product.category
+
+        category = category.strip().lower()
+        if category in {'health and household', 'health & household'}:
+            return Decimal('1.0000')
+
+        return Decimal('1.0825')
 
     def _generate_analysis_notes(
         self,

@@ -247,6 +247,41 @@ class KeepaProductData(BaseModel):
         return f'{self.asin} ({self.get_marketplace_display()}) - {self.title[:50]}'
 
 
+class BrandRestriction(BaseModel):
+    """Marca con permiso o bloqueo de venta."""
+
+    name = models.CharField(
+        max_length=255,
+        unique=True,
+        help_text='Nombre de la marca'
+    )
+    normalized_name = models.CharField(
+        max_length=255,
+        unique=True,
+        help_text='Nombre normalizado para matching'
+    )
+    is_allowed = models.BooleanField(
+        default=False,
+        help_text='Si la marca esta permitida para venta'
+    )
+
+    class Meta:
+        verbose_name = 'Brand Restriction'
+        verbose_name_plural = 'Brand Restrictions'
+        ordering = ['name']
+        indexes = [
+            models.Index(fields=['normalized_name']),
+        ]
+
+    def save(self, *args, **kwargs):
+        self.normalized_name = (self.name or '').strip().lower()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        status = 'Allowed' if self.is_allowed else 'Blocked'
+        return f'{self.name} ({status})'
+
+
 class BreakEvenAnalysisConfig(BaseModel):
     """Configuración de parámetros del análisis (permite ajustar sin cambiar código)."""
 

@@ -48,10 +48,78 @@
                 </tr>
 
                 <tr>
-                    <td><strong>Precio recomendado (25% margen):</strong></td>
+                    <td><strong>Precio minimo (25% sobre BE):</strong></td>
                     <td class="text-end price-value">
-                        {% if analysis.recommended_price %}
-                            ${{ analysis.recommended_price.amount|floatformat:2 }} {{ analysis.recommended_price.currency }}
+                        {% if analysis.break_even_price %}
+                            ${{ metrics.recommended_min|floatformat:2 }} {{ analysis.break_even_price.currency }}
+                        {% else %}
+                            <span class="text-muted">-</span>
+                        {% endif %}
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><strong>Precio maximo (50% sobre BE):</strong></td>
+                    <td class="text-end price-value">
+                        {% if analysis.break_even_price %}
+                            ${{ metrics.recommended_max|floatformat:2 }} {{ analysis.break_even_price.currency }}
+                        {% else %}
+                            <span class="text-muted">-</span>
+                        {% endif %}
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><strong>Retenciones (precio actual):</strong></td>
+                    <td class="text-end price-value">
+                        {% if analysis.current_mx_amazon_price %}
+                            -${{ metrics.retention_current|floatformat:2 }} MXN
+                        {% else %}
+                            <span class="text-muted">-</span>
+                        {% endif %}
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><strong>Retenciones (precio minimo):</strong></td>
+                    <td class="text-end price-value">
+                        {% if analysis.break_even_price %}
+                            -${{ metrics.retention_min|floatformat:2 }} MXN
+                        {% else %}
+                            <span class="text-muted">-</span>
+                        {% endif %}
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><strong>Retenciones (precio maximo):</strong></td>
+                    <td class="text-end price-value">
+                        {% if analysis.break_even_price %}
+                            -${{ metrics.retention_max|floatformat:2 }} MXN
+                        {% else %}
+                            <span class="text-muted">-</span>
+                        {% endif %}
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><strong>Utilidad neta (precio actual):</strong></td>
+                    <td class="text-end price-value">
+                        {% if analysis.current_mx_amazon_price %}
+                            ${{ metrics.net_profit_current|floatformat:2 }} MXN
+                        {% else %}
+                            <span class="text-muted">-</span>
+                        {% endif %}
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><strong>Margen neto sobre precio:</strong></td>
+                    <td class="text-end">
+                        {% if analysis.current_mx_amazon_price %}
+                            <span class="badge bg-info">
+                                {{ metrics.net_margin_current|floatformat:2 }}%
+                            </span>
                         {% else %}
                             <span class="text-muted">-</span>
                         {% endif %}
@@ -67,7 +135,7 @@
                             </span>
                             <br>
                             <small class="text-muted">
-                                ({{ metrics.price_diff_percentage|floatformat:1 }}% sobre Break Even)
+                                ({{ metrics.current_margin_percentage|floatformat:1 }}% margen sobre BE)
                             </small>
                         {% else %}
                             <span class="text-muted">-</span>

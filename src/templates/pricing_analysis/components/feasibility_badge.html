@@ -1,6 +1,22 @@
 <!-- Feasibility Badge Component -->
 <div class="card h-100 shadow-sm
-    {% if not analysis.is_available_usa %}
+    {% if brand_status.is_blocked %}
+        <!-- Marca bloqueada -->
+        <div class="display-1 text-danger mb-3">
+            <i class="bi bi-shield-lock-fill"></i>
+        </div>
+        <h3 class="text-danger mb-3">MARCA BLOQUEADA</h3>
+        <p class="text-muted">
+            Esta marca no esta autorizada para tu cuenta.
+        </p>
+
+        {% if brand_status.brand %}
+            <span class="badge bg-danger fs-6 px-3 py-2">
+                {{ brand_status.brand }}
+            </span>
+        {% endif %}
+
+    {% elif not analysis.is_available_usa %}
         border-warning bg-warning bg-opacity-10
     {% elif analysis.is_feasible %}
         border-success bg-success bg-opacity-10
