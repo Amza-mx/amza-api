@@ -20,5 +20,6 @@ router.registry.extend(pricing_router.registry)
 
 # Main URL Pattern for the API
 urlpatterns = [
-    path('v1/', include(router.urls)),
+    path('', include(router.urls)),
+    path('', include('api.v1.healthcheck.urls')),
 ]
