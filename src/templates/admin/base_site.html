@@ -1,0 +1,36 @@
+{% extends "admin/base.html" %}
+
+{% block userlinks %}
+    <a href="/" class="btn btn-sm btn-outline-light me-2" target="_blank" title="Ver el sitio principal">
+        <i class="bi bi-house-fill"></i> Ver Sitio
+    </a>
+    {{ block.super }}
+{% endblock %}
+
+{% block extrahead %}
+    {{ block.super }}
+    <!-- Bootstrap Icons for the view site button -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        .btn-outline-light {
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            color: rgba(255, 255, 255, 0.9);
+            padding: 0.25rem 0.75rem;
+            font-size: 0.875rem;
+            border-radius: 0.25rem;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.2s;
+        }
+        .btn-outline-light:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-color: white;
+        }
+        #user-tools {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+    </style>
+{% endblock %}
