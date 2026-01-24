@@ -76,6 +76,13 @@ class PricingAnalysisService:
 
         # 4. Handle unavailable products
         if usa_cost_source == 'unavailable':
+            if mx_keepa_data and mx_keepa_data.sync_error_message and 'Buybox already owned' in mx_keepa_data.sync_error_message:
+                return self._create_buybox_owned_result(
+                    asin=asin,
+                    usa_keepa_data=usa_keepa_data,
+                    mx_keepa_data=mx_keepa_data,
+                    config=config,
+                )
             return self._create_unavailable_result(
                 asin=asin,
                 usa_keepa_data=usa_keepa_data,
@@ -226,6 +233,38 @@ class PricingAnalysisService:
 
         return result
 
+    def _create_buybox_owned_result(
+        self,
+        asin: str,
+        usa_keepa_data,
+        mx_keepa_data,
+        config: BreakEvenAnalysisConfig
+    ) -> PricingAnalysisResult:
+        """Create result when buybox is already owned by this seller."""
+        product = usa_keepa_data.product or mx_keepa_data.product
+        if product is None:
+            product = self.keepa_service.get_or_create_product(
+                asin,
+                usa_keepa_data.raw_data or {}
+            )
+
+        return PricingAnalysisResult.objects.create(
+            product=product,
+            asin=asin,
+            usa_keepa_data=usa_keepa_data,
+            mx_keepa_data=mx_keepa_data,
+            analysis_config=config,
+            usa_cost=Money(Decimal('0'), 'USD'),
+            usa_cost_source='unavailable',
+            is_available_usa=True,
+            is_feasible=False,
+            analysis_notes=(
+                '⛔ Buy Box ya pertenece a tu seller. '
+                'Se omite analisis porque no es un ASIN nuevo a listar.'
+            ),
+        )
+
+
     def _get_brand_status(self, usa_keepa_data, product) -> dict:
         brand = ''
         if usa_keepa_data and usa_keepa_data.brand:
@@ -242,6 +281,7 @@ class PricingAnalysisService:
             return {'brand': brand, 'is_blocked': False}
 
         return {'brand': brand, 'is_blocked': not restriction.is_allowed}
+
 
     def _get_usa_tax_multiplier(self, usa_keepa_data, product) -> Decimal:
         """Return USA tax multiplier based on category rules."""

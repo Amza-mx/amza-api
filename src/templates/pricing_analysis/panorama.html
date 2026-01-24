@@ -153,9 +153,14 @@
                         {% for row in rows %}
                         <tr class="{% if row.vendible %}table-success{% elif not row.disponible_usa %}table-warning{% else %}table-danger{% endif %}">
                             <td data-col="asin">
-                                <a class="fw-semibold text-decoration-none" href="{{ row.detail_url }}">
-                                    {{ row.asin }}
-                                </a>
+                                <div class="d-flex align-items-center gap-2">
+                                    {% if row.image_url %}
+                                        <img src="{{ row.image_url }}" alt="Producto {{ row.asin }}" class="rounded border" style="width: 40px; height: 40px; object-fit: cover;">
+                                    {% endif %}
+                                    <a class="fw-semibold text-decoration-none" href="{{ row.detail_url }}">
+                                        {{ row.asin }}
+                                    </a>
+                                </div>
                                 <div class="mt-2">
                                     <a class="btn btn-sm btn-primary"
                                        href="https://sellercentral.amazon.com.mx/interactive/listing/workflow/offer/offer?asin={{ row.asin }}&conditionType=new"

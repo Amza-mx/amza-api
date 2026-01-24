@@ -3,25 +3,32 @@
     <div class="card-body">
         <div class="row align-items-center">
             <div class="col-md-8">
-                <h2 class="mb-2">
-                    <i class="bi bi-upc-scan text-primary"></i>
-                    ASIN: <span class="text-primary">{{ analysis.asin }}</span>
-                </h2>
-
-                {% if analysis.usa_keepa_data and analysis.usa_keepa_data.title %}
-                <h5 class="text-muted mb-2">
-                    {{ analysis.usa_keepa_data.title|truncatechars:100 }}
-                </h5>
-                {% endif %}
-
-                <div class="text-muted">
-                    {% if analysis.product %}
-                        <i class="bi bi-box-seam"></i> SKU: <strong>{{ analysis.product.sku }}</strong>
+                <div class="d-flex align-items-start gap-3">
+                    {% if image_url %}
+                        <img src="{{ image_url }}" alt="Producto {{ analysis.asin }}" class="rounded border" style="width: 90px; height: 90px; object-fit: cover;">
                     {% endif %}
+                    <div>
+                        <h2 class="mb-2">
+                            <i class="bi bi-upc-scan text-primary"></i>
+                            ASIN: <span class="text-primary">{{ analysis.asin }}</span>
+                        </h2>
 
-                    {% if analysis.usa_keepa_data and analysis.usa_keepa_data.brand %}
-                        | <i class="bi bi-tag"></i> Brand: <strong>{{ analysis.usa_keepa_data.brand }}</strong>
-                    {% endif %}
+                        {% if analysis.usa_keepa_data and analysis.usa_keepa_data.title %}
+                        <h5 class="text-muted mb-2">
+                            {{ analysis.usa_keepa_data.title|truncatechars:100 }}
+                        </h5>
+                        {% endif %}
+
+                        <div class="text-muted">
+                            {% if analysis.product %}
+                                <i class="bi bi-box-seam"></i> SKU: <strong>{{ analysis.product.sku }}</strong>
+                            {% endif %}
+
+                            {% if analysis.usa_keepa_data and analysis.usa_keepa_data.brand %}
+                                | <i class="bi bi-tag"></i> Brand: <strong>{{ analysis.usa_keepa_data.brand }}</strong>
+                            {% endif %}
+                        </div>
+                    </div>
                 </div>
             </div>
 

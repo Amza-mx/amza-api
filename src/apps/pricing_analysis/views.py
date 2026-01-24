@@ -54,6 +54,31 @@ def _get_brand_status(analysis: PricingAnalysisResult) -> dict:
     }
 
 
+def _get_first_image_url(analysis: PricingAnalysisResult) -> str:
+    """Return first product image URL from Keepa raw data if available."""
+    raw = None
+    if analysis.usa_keepa_data and analysis.usa_keepa_data.raw_data:
+        raw = analysis.usa_keepa_data.raw_data
+    elif analysis.mx_keepa_data and analysis.mx_keepa_data.raw_data:
+        raw = analysis.mx_keepa_data.raw_data
+
+    if not raw:
+        return ''
+
+    images_csv = raw.get('imagesCSV', '')
+    if not images_csv:
+        return ''
+
+    first = images_csv.split(',')[0].strip()
+    if not first:
+        return ''
+
+    if not first.lower().endswith(('.jpg', '.jpeg', '.png', '.webp')):
+        first = f'{first}.jpg'
+
+    return f'https://images-na.ssl-images-amazon.com/images/I/{first}'
+
+
 class PricingAnalysisPanoramaView(LoginRequiredMixin, ListView):
     """
     Vista panoramica para revisar analisis en forma de tabla.
@@ -86,6 +111,7 @@ class PricingAnalysisPanoramaView(LoginRequiredMixin, ListView):
             import_taxes = None
             import_taxes_usd = None
             brand_status = _get_brand_status(analysis)
+            image_url = _get_first_image_url(analysis)
 
             if analysis.usa_cost and analysis.exchange_rate:
                 usa_tax_multiplier = _get_usa_tax_multiplier(analysis)
@@ -144,6 +170,7 @@ class PricingAnalysisPanoramaView(LoginRequiredMixin, ListView):
                 'id': analysis.id,
                 'asin': analysis.asin,
                 'detail_url': reverse('pricing_analysis:result_detail', args=[analysis.pk]),
+                'image_url': image_url,
                 'precio_mx': analysis.current_mx_amazon_price.amount if analysis.current_mx_amazon_price else None,
                 'precio_usa_usd': analysis.usa_cost.amount if analysis.usa_cost else None,
                 'taxes': import_taxes_usd,
@@ -346,6 +373,7 @@ class PricingAnalysisResultDetailView(LoginRequiredMixin, DetailView):
 
         # Estado de marca
         context['brand_status'] = _get_brand_status(analysis)
+        context['image_url'] = _get_first_image_url(analysis)
 
         # Configuración de badges de confianza
         context['confidence_badges'] = {

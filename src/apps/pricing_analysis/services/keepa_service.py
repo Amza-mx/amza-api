@@ -36,6 +36,7 @@ class KeepaService:
         'US': 'US',  # Amazon.com
         'MX': 'MX',  # Amazon.com.mx
     }
+    BUYBOX_OWNER_SELLER_ID = 'A1ZOPWBOS19F82'
 
     def __init__(self):
         """Initialize Keepa API client."""
@@ -74,14 +75,19 @@ class KeepaService:
         # Apply first pass
         converted = first_pass(obj)
 
+        # Preserve imagesCSV even if full serialization fails
+        images_csv = ''
+        if isinstance(obj, dict) and isinstance(obj.get('imagesCSV'), str):
+            images_csv = obj.get('imagesCSV', '')
+
         # Second pass: use DjangoJSONEncoder to handle datetime and convert back
         try:
             json_str = json.dumps(converted, cls=DjangoJSONEncoder)
             return json.loads(json_str)
         except (TypeError, ValueError) as e:
-            # If still failing, log and return empty dict
+            # If still failing, log and return minimal payload
             print(f"Warning: Could not serialize Keepa data: {e}")
-            return {}
+            return {'imagesCSV': images_csv} if images_csv else {}
 
     def _get_active_config(self) -> KeepaConfiguration:
         """Get the active Keepa configuration."""
@@ -159,6 +165,19 @@ class KeepaService:
                 return self._create_unavailable_keepa_data(asin, marketplace)
 
             product_data = products[0]
+
+            # Skip products where buybox is already owned by this seller (MX only)
+            if marketplace == 'MX':
+                buybox_seller_id = self._get_buybox_seller_id_from_product(product_data)
+                if buybox_seller_id == self.BUYBOX_OWNER_SELLER_ID:
+                    return self._create_unavailable_keepa_data(
+                        asin,
+                        marketplace,
+                        raw_data=self._convert_to_json_serializable(product_data),
+                        sync_error_message=(
+                            f'Buybox already owned by seller {self.BUYBOX_OWNER_SELLER_ID}'
+                        ),
+                    )
 
             # Parse and save data
             keepa_data = self._parse_keepa_response(
@@ -265,7 +284,9 @@ class KeepaService:
     def _create_unavailable_keepa_data(
         self,
         asin: str,
-        marketplace: str
+        marketplace: str,
+        raw_data: Optional[dict] = None,
+        sync_error_message: str = 'Product not found in Keepa'
     ) -> KeepaProductData:
         """Create KeepaProductData for unavailable product."""
         keepa_data, created = KeepaProductData.objects.update_or_create(
@@ -275,8 +296,8 @@ class KeepaService:
                 'product': None,
                 'is_available': False,
                 'sync_successful': False,
-                'sync_error_message': 'Product not found in Keepa',
-                'raw_data': {},
+                'sync_error_message': sync_error_message,
+                'raw_data': raw_data or {},
             }
         )
         return keepa_data
@@ -347,6 +368,22 @@ class KeepaService:
             return (usa_keepa_data.current_new_price, 'new')
 
         return (None, 'unavailable')
+
+    def _get_buybox_seller_id_from_product(self, keepa_product: dict) -> Optional[str]:
+        """Extract last buybox seller id from Keepa product data."""
+        if not keepa_product:
+            return None
+
+        direct = keepa_product.get('buyBoxSellerId')
+        if isinstance(direct, str) and direct.strip():
+            return direct.strip()
+
+        history = keepa_product.get('buyBoxSellerIdHistory')
+        if isinstance(history, list) and history:
+            for value in reversed(history):
+                if isinstance(value, str) and value.strip():
+                    return value.strip()
+        return None
 
     def fetch_bulk_product_data(
         self,
