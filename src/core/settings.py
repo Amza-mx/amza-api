@@ -76,6 +76,7 @@ OWN_APPS = [
     'apps.purchases_orders',
     'apps.sellers',
     'apps.pricing_analysis',
+    'apps.store_products',
     'apps.home',
 ]
 

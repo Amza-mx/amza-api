@@ -22,4 +22,5 @@ router.registry.extend(pricing_router.registry)
 urlpatterns = [
     path('', include(router.urls)),
     path('', include('api.v1.healthcheck.urls')),
+    path('', include('apps.store_products.api_urls')),
 ]

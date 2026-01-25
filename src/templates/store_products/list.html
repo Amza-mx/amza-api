@@ -1,0 +1,223 @@
+{% extends "pricing_analysis/base.html" %}
+
+{% block title %}Store Products{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row g-4">
+        <div class="col-12 col-lg-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <i class="bi bi-plus-circle"></i> Agregar ASIN
+                </div>
+                <div class="card-body">
+                    {% if error %}
+                        <div class="alert alert-danger">{{ error }}</div>
+                    {% endif %}
+                    {% if success %}
+                        <div class="alert alert-success">{{ success }}</div>
+                    {% endif %}
+                    {% if keepa_error %}
+                        <div class="alert alert-warning">
+                            Error Keepa: {{ keepa_error }}
+                        </div>
+                    {% endif %}
+                    {% if keepa_status %}
+                        <div class="alert alert-info">
+                            Estado Keepa: {{ keepa_status }}
+                        </div>
+                    {% endif %}
+                    <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="add_single">
+                        <div class="mb-3">
+                            {{ add_form.asin.label_tag }}
+                            {{ add_form.asin }}
+                        </div>
+                        <div class="mb-3">
+                            {{ add_form.sku.label_tag }}
+                            {{ add_form.sku }}
+                        </div>
+                        <div class="mb-3">
+                            {{ add_form.price_mxn.label_tag }}
+                            {{ add_form.price_mxn }}
+                        </div>
+                        <div class="mb-3">
+                            {{ add_form.tracking_type.label_tag }}
+                            {{ add_form.tracking_type }}
+                        </div>
+                        <div class="form-check mb-2">
+                            {{ add_form.tracking_enabled }}
+                            <label class="form-check-label" for="{{ add_form.tracking_enabled.id_for_label }}">
+                                Habilitar tracking Keepa
+                            </label>
+                        </div>
+                        <div class="form-check mb-3">
+                            {{ add_form.is_active }}
+                            <label class="form-check-label" for="{{ add_form.is_active.id_for_label }}">
+                                Producto activo
+                            </label>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-plus"></i> Agregar
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-header bg-dark text-white">
+                    <i class="bi bi-cloud-upload"></i> Cargar ASINs (CSV)
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="upload">
+                        <div class="mb-3">
+                            {{ upload_form.file.label_tag }}
+                            {{ upload_form.file }}
+                            <div class="form-text">
+                                Columnas: asin, sku, price_mxn, is_active
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            {{ upload_form.tracking_type.label_tag }}
+                            {{ upload_form.tracking_type }}
+                        </div>
+                        <div class="form-check mb-2">
+                            {{ upload_form.tracking_enabled }}
+                            <label class="form-check-label" for="{{ upload_form.tracking_enabled.id_for_label }}">
+                                Habilitar tracking Keepa
+                            </label>
+                        </div>
+                        <div class="form-check mb-3">
+                            {{ upload_form.is_active }}
+                            <label class="form-check-label" for="{{ upload_form.is_active.id_for_label }}">
+                                Producto activo
+                            </label>
+                        </div>
+                        <button type="submit" class="btn btn-outline-dark w-100">
+                            <i class="bi bi-upload"></i> Cargar
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-lg-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                    <span><i class="bi bi-bell"></i> Notificaciones Keepa</span>
+                    <span class="badge bg-warning text-dark">Pendientes: {{ unread_count }}</span>
+                </div>
+                <div class="card-body">
+                    <form method="post" class="mb-3">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="mark_all_read">
+                        <button type="submit" class="btn btn-outline-secondary btn-sm">
+                            Marcar todo como leido
+                        </button>
+                    </form>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-striped">
+                            <thead>
+                                <tr>
+                                    <th>ASIN</th>
+                                    <th>Marketplace</th>
+                                    <th>Evento</th>
+                                    <th>Fecha</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for notification in notifications %}
+                                    <tr>
+                                        <td>{{ notification.asin }}</td>
+                                        <td>{{ notification.marketplace }}</td>
+                                        <td>{{ notification.event_type }}</td>
+                                        <td>{{ notification.created_at|date:"Y-m-d H:i" }}</td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted">
+                                            Sin notificaciones.
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <i class="bi bi-box-seam"></i> Productos en tienda
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>ASIN</th>
+                                    <th>SKU</th>
+                                    <th>Precio MXN</th>
+                                    <th>Tracking</th>
+                                    <th>Disponible</th>
+                                    <th>Ultima alerta</th>
+                                    <th>Verificar</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for product in products %}
+                                    <tr>
+                                        <td>{{ product.asin }}</td>
+                                        <td>{{ product.sku }}</td>
+                                        <td>
+                                            {% if product.price_mxn %}
+                                                ${{ product.price_mxn|floatformat:2 }}
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ product.tracking_type }}</td>
+                                        <td>
+                                            {% if product.keepa_available %}
+                                                <span class="badge bg-success">Disponible</span>
+                                            {% else %}
+                                                <span class="badge bg-danger">No disponible</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if product.last_keepa_notification_at %}
+                                                {{ product.last_keepa_notification_at|date:"Y-m-d H:i" }}
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <form method="post">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="action" value="verify_tracking">
+                                                <input type="hidden" name="asin" value="{{ product.asin }}">
+                                                <button type="submit" class="btn btn-sm btn-outline-primary">
+                                                    Verificar
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="7" class="text-center text-muted">
+                                            No hay productos cargados.
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

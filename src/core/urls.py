@@ -10,4 +10,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('api.urls')),
     path('pricing-analysis/', include('apps.pricing_analysis.urls')),
+    path('store-products/', include('apps.store_products.urls')),
 ]
