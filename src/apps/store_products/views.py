@@ -105,6 +105,7 @@ class StoreProductListView(LoginRequiredMixin, View):
                         [asin],
                         tracking_type=tracking_type,
                         marketplace='US',
+                        update_interval_hours=1,
                     )
                     if response.get('error'):
                         keepa_error = response['error']
@@ -254,6 +255,7 @@ class StoreProductListView(LoginRequiredMixin, View):
                         tracked_asins,
                         tracking_type=tracking_type,
                         marketplace='US',
+                        update_interval_hours=1,
                     )
                     if response.get('error'):
                         keepa_error = response['error']

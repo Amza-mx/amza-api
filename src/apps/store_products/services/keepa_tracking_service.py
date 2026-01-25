@@ -43,9 +43,28 @@ class KeepaTrackingService:
         asins: list[str],
         tracking_type: str = 'regular',
         marketplace: str = 'US',
-        update_interval_hours: int | None = 0,
+        update_interval_hours: int = 1,
         list_name: str | None = None,
+        threshold_value: int | None = None,
+        csv_type: int = 0,
+        is_drop: bool = True,
     ) -> dict:
+        """
+        Add product tracking to Keepa.
+
+        Args:
+            asins: List of ASINs to track
+            tracking_type: 'regular' or 'marketplace'
+            marketplace: 'US' or other Amazon marketplace
+            update_interval_hours: Update interval (0-25 hours). Lower = more frequent updates.
+            list_name: Optional named list for logical separation
+            threshold_value: Price threshold in smallest currency unit (cents). None = track all changes.
+            csv_type: Price type to track (0=Amazon, 1=New, 2=Used, etc.)
+            is_drop: True to notify on price drops, False for price increases
+
+        Returns:
+            Keepa API response with trackings array
+        """
         domain_id = self.DOMAIN_US if marketplace == 'US' else self.DOMAIN_US
         params = {'type': 'add'}
         if list_name:
@@ -54,21 +73,44 @@ class KeepaTrackingService:
         def build_payload() -> list[dict]:
             payload = []
             for asin in asins:
+                # NotificationType array: only enable API notifications (index 5)
                 notification_type = [False] * 7
                 notification_type[self.NOTIFICATION_TYPE_API_INDEX] = True
+
+                # Build tracking creation object
                 item = {
                     'asin': asin,
                     'mainDomainId': domain_id,
-                    'ttl': 0,
-                    'expireNotify': True,
+                    'ttl': 0,  # Never expires
+                    'expireNotify': True,  # Notify if tracking expires
                     'desiredPricesInMainCurrency': True,
+                    'updateInterval': max(0, min(25, int(update_interval_hours))),  # REQUIRED: 0-25
                     'notificationType': notification_type,
-                    'individualNotificationInterval': -1,
+                    'individualNotificationInterval': -1,  # Use default rearm timer
                 }
-                if update_interval_hours is not None:
-                    item['updateInterval'] = max(0, min(25, int(update_interval_hours)))
-                if list_name:
-                    item['trackingListName'] = list_name
+
+                # Add tracking criteria based on type and threshold
+                if threshold_value is not None:
+                    # Track specific price threshold
+                    item['thresholdValues'] = [{
+                        'thresholdValue': threshold_value,
+                        'domain': domain_id,
+                        'csvType': csv_type,
+                        'isDrop': is_drop,
+                    }]
+                else:
+                    # Track stock status changes (no specific price threshold)
+                    item['notifyIf'] = [
+                        {
+                            'domain': domain_id,
+                            'csvType': csv_type,
+                            'notifyIfType': 1,  # BACK_IN_STOCK
+                        }
+                    ]
+
+                # Add metadata for identification
+                item['metaData'] = f'StoreProduct_{asin}_{tracking_type}'
+
                 payload.append(item)
             return payload
 
