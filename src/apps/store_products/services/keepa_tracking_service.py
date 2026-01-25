@@ -1,7 +1,7 @@
 import json
 import requests
 from django.conf import settings
-
+from apps.pricing_analysis.models import KeepaConfiguration
 
 class KeepaTrackingService:
     BASE_URL = 'https://api.keepa.com/tracking'
@@ -9,7 +9,13 @@ class KeepaTrackingService:
     NOTIFICATION_TYPE_API_INDEX = 5
 
     def __init__(self, api_key: str | None = None):
-        self.api_key = api_key or settings.KEEPA_API_KEY
+        self.api_key = self.get_api_key()
+
+    def get_api_key(self) -> str | None:
+        keepa_configuration = KeepaConfiguration.objects.last()
+        if keepa_configuration:
+            return keepa_configuration.api_key
+        return None
 
     def _post(self, params: dict, payload: list | dict | None = None) -> dict:
         if not self.api_key:
