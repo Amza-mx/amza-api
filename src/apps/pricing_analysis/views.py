@@ -183,7 +183,7 @@ class PricingAnalysisPanoramaView(LoginRequiredMixin, ListView):
             )
             mx_rank = analysis.mx_keepa_data.sales_rank if analysis.mx_keepa_data else None
             mx_drops = (
-                _get_stat_value(analysis.mx_keepa_data.raw_data, ['drops30', 'drops30d', 'drops_30'])
+                _get_stat_value(analysis.mx_keepa_data.raw_data, ['salesRankDrops30'])
                 if analysis.mx_keepa_data and analysis.mx_keepa_data.raw_data else None
             )
 
@@ -198,7 +198,7 @@ class PricingAnalysisPanoramaView(LoginRequiredMixin, ListView):
                 'sales_rank_us': analysis.usa_keepa_data.sales_rank if analysis.usa_keepa_data else None,
                 'bought_past_month_mx': mx_bought,
                 'sales_rank_mx': mx_rank,
-                'drops_30_us': _get_stat_value(analysis.usa_keepa_data.raw_data, ['drops30', 'drops30d', 'drops_30']) if analysis.usa_keepa_data and analysis.usa_keepa_data.raw_data else None,
+                'drops_30_us': _get_stat_value(analysis.usa_keepa_data.raw_data, ['salesRankDrops30']) if analysis.usa_keepa_data and analysis.usa_keepa_data.raw_data else None,
                 'drops_30_mx': mx_drops,
                 'precio_mx': analysis.current_mx_amazon_price.amount if analysis.current_mx_amazon_price else None,
                 'precio_usa_usd': analysis.usa_cost.amount if analysis.usa_cost else None,
@@ -414,11 +414,11 @@ class PricingAnalysisResultDetailView(LoginRequiredMixin, DetailView):
         )
         context['sales_rank_mx'] = analysis.mx_keepa_data.sales_rank if analysis.mx_keepa_data else None
         context['drops_30_us'] = (
-            _get_stat_value(analysis.usa_keepa_data.raw_data, ['drops30', 'drops30d', 'drops_30'])
+            _get_stat_value(analysis.usa_keepa_data.raw_data, ['salesRankDrops30'])
             if analysis.usa_keepa_data and analysis.usa_keepa_data.raw_data else None
         )
         context['drops_30_mx'] = (
-            _get_stat_value(analysis.mx_keepa_data.raw_data, ['drops30', 'drops30d', 'drops_30'])
+            _get_stat_value(analysis.mx_keepa_data.raw_data, ['salesRankDrops30'])
             if analysis.mx_keepa_data and analysis.mx_keepa_data.raw_data else None
         )
         context['sales_rank'] = analysis.usa_keepa_data.sales_rank if analysis.usa_keepa_data else None

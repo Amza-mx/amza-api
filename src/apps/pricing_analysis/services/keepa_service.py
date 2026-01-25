@@ -278,6 +278,29 @@ class KeepaService:
         product = self.get_or_create_product(asin, keepa_product)
 
         # Create or update KeepaProductData
+        # Safely extract sales rank
+        # salesRanks structure: {category_id: [timestamp, rank, timestamp, rank, ...]}
+        # We want the most recent rank from the primary category
+        sales_rank = None
+        sales_ranks = keepa_product.get('salesRanks') or {}
+        sales_rank_reference = keepa_product.get('salesRankReference')
+
+        if isinstance(sales_ranks, dict) and sales_rank_reference:
+            # Get the primary category's rank history
+            primary_category_ranks = sales_ranks.get(str(sales_rank_reference))
+            if isinstance(primary_category_ranks, (list, tuple)) and len(primary_category_ranks) >= 2:
+                # Last item is the most recent rank (array is [timestamp, rank, timestamp, rank, ...])
+                sales_rank = primary_category_ranks[-1]
+
+        # Fallback: try to get from stats.current[3] if salesRanks failed
+        if sales_rank is None:
+            stats = keepa_product.get('stats', {})
+            current_stats = stats.get('current', [])
+            if isinstance(current_stats, (list, tuple)) and len(current_stats) > 3:
+                rank_value = current_stats[3]
+                if rank_value is not None and rank_value != -1:
+                    sales_rank = rank_value
+
         keepa_data, created = KeepaProductData.objects.update_or_create(
             asin=asin,
             marketplace=marketplace,
@@ -288,10 +311,10 @@ class KeepaService:
                 'current_new_price': get_current_price('NEW'),
                 'avg_30_days_price': Decimal(str(stats.get('avg30', [None])[0])) if stats.get('avg30') and stats.get('avg30')[0] not in (None, -1) else None,
                 'avg_90_days_price': Decimal(str(stats.get('avg90', [None])[0])) if stats.get('avg90') and stats.get('avg90')[0] not in (None, -1) else None,
-                'title': keepa_product.get('title', ''),
-                'brand': keepa_product.get('brand', ''),
+                'title': keepa_product.get('title') or '',
+                'brand': keepa_product.get('brand') or '',
                 'product_category': keepa_product.get('categoryTree', [{}])[0].get('name', '') if keepa_product.get('categoryTree') else '',
-                'sales_rank': keepa_product.get('salesRanks', {}).get('current', [None, None])[1] if keepa_product.get('salesRanks', {}).get('current') else None,
+                'sales_rank': sales_rank,
                 'is_available': is_available,
                 'raw_data': self._convert_to_json_serializable(keepa_product),
                 'sync_successful': True,
@@ -341,7 +364,7 @@ class KeepaService:
             pass
 
         # Create new product
-        title = keepa_data.get('title', f'Keepa Product {asin}')
+        title = keepa_data.get('title') or f'Keepa Product {asin}'
         sku = f'KEEPA-{asin}'
 
         # Map category (simplified - you might want to enhance this)
