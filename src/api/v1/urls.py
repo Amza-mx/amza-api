@@ -23,4 +23,5 @@ urlpatterns = [
     path('', include(router.urls)),
     path('', include('api.v1.healthcheck.urls')),
     path('', include('apps.store_products.api_urls')),
+    path('webhooks/', include('api.v1.webhooks.urls')),
 ]
