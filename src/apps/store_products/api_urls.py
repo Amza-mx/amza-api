@@ -1,7 +1,8 @@
 from django.urls import path
 
-from .views import keepa_webhook
+from api.v1.webhooks.views import KeepaWebhookView
 
 urlpatterns = [
-    path('webhooks/keepa', keepa_webhook, name='keepa_webhook'),
+    # Redirigir a la nueva vista basada en clases
+    path('webhooks/keepa', KeepaWebhookView.as_view(), name='keepa_webhook'),
 ]
