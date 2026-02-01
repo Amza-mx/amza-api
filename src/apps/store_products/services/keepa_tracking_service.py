@@ -6,7 +6,7 @@ from apps.pricing_analysis.models import KeepaConfiguration
 class KeepaTrackingService:
     BASE_URL = 'https://api.keepa.com/tracking'
     DOMAIN_US = 1
-    DOMAIN_MX = 12
+    DOMAIN_MX = 11  # Amazon Mexico domain ID (not 12, which is Brazil)
     NOTIFICATION_TYPE_API_INDEX = 5
 
     def __init__(self, api_key: str | None = None):
