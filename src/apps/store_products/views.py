@@ -10,9 +10,9 @@ from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse, HttpResponseNotAllowed
 
-from .forms import StoreProductUploadForm, StoreProductAddForm
-from .models import StoreProduct, KeepaNotification
-from .services.keepa_tracking_service import KeepaTrackingService
+from apps.store_products.forms import StoreProductUploadForm, StoreProductAddForm
+from apps.store_products.models import StoreProduct, KeepaNotification
+from apps.store_products.services.keepa_tracking_service import KeepaTrackingService
 
 
 def _decode_upload(file_obj):
@@ -79,6 +79,7 @@ class StoreProductListView(LoginRequiredMixin, View):
             asin = form.cleaned_data['asin'].strip().upper()
             sku = form.cleaned_data.get('sku', '').strip()
             price_mxn = form.cleaned_data.get('price_mxn')
+            marketplace = form.cleaned_data.get('marketplace', 'MX')
             tracking_type = form.cleaned_data['tracking_type']
             tracking_enabled = bool(form.cleaned_data.get('tracking_enabled'))
             is_active = bool(form.cleaned_data.get('is_active'))
@@ -91,7 +92,7 @@ class StoreProductListView(LoginRequiredMixin, View):
                     'is_active': is_active,
                     'tracking_type': tracking_type,
                     'tracking_enabled': tracking_enabled,
-                    'keepa_marketplace': 'US',
+                    'keepa_marketplace': marketplace,
                 },
             )
 
@@ -104,7 +105,7 @@ class StoreProductListView(LoginRequiredMixin, View):
                     response = service.add_tracking(
                         [asin],
                         tracking_type=tracking_type,
-                        marketplace='US',
+                        marketplace=marketplace,
                         update_interval_hours=1,
                     )
                     if response.get('error'):
@@ -174,6 +175,7 @@ class StoreProductListView(LoginRequiredMixin, View):
                 })
 
             file = form.cleaned_data['file']
+            marketplace = form.cleaned_data.get('marketplace', 'MX')
             tracking_type = form.cleaned_data['tracking_type']
             tracking_enabled = bool(form.cleaned_data.get('tracking_enabled'))
             is_active = bool(form.cleaned_data.get('is_active'))
@@ -234,7 +236,7 @@ class StoreProductListView(LoginRequiredMixin, View):
                         'is_active': row_active,
                         'tracking_type': tracking_type,
                         'tracking_enabled': tracking_enabled,
-                        'keepa_marketplace': 'US',
+                        'keepa_marketplace': marketplace,
                     },
                 )
                 if created:
@@ -254,7 +256,7 @@ class StoreProductListView(LoginRequiredMixin, View):
                     response = service.add_tracking(
                         tracked_asins,
                         tracking_type=tracking_type,
-                        marketplace='US',
+                        marketplace=marketplace,
                         update_interval_hours=1,
                     )
                     if response.get('error'):
