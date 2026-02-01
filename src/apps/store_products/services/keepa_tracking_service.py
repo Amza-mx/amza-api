@@ -98,7 +98,8 @@ class KeepaTrackingService:
             payload = []
             for asin in asins:
                 # NotificationType array: only enable API notifications (index 5)
-                notification_type = [False] * 7
+                # Array must have 8 elements according to Keepa API documentation
+                notification_type = [False] * 8
                 notification_type[self.NOTIFICATION_TYPE_API_INDEX] = True
 
                 # Build tracking creation object
