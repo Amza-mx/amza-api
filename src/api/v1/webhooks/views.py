@@ -4,19 +4,16 @@ Webhooks API Views
 Este módulo contiene las vistas para recibir webhooks de servicios externos.
 """
 
-import json
-
-from django.http import JsonResponse, HttpResponseNotAllowed
 from django.utils import timezone
-from django.utils.decorators import method_decorator
-from django.views import View
-from django.views.decorators.csrf import csrf_exempt
+from rest_framework import status
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from apps.store_products.models import StoreProduct, KeepaNotification
 
 
-@method_decorator(csrf_exempt, name='dispatch')
-class KeepaWebhookView(View):
+class KeepaWebhookView(APIView):
     """
     Vista para recibir notificaciones push de Keepa API.
 
@@ -24,8 +21,7 @@ class KeepaWebhookView(View):
     configurados en Keepa (cambios de precio, disponibilidad de stock, etc.).
 
     Características:
-    - Sin autenticación (endpoint público)
-    - Sin protección CSRF (requerido para webhooks externos)
+    - Sin autenticación (endpoint público con AllowAny)
     - Solo acepta método POST
     - Siempre retorna 200 OK para confirmar recepción a Keepa
 
@@ -40,11 +36,14 @@ class KeepaWebhookView(View):
     }
     """
 
+    # Permitir acceso sin autenticación (endpoint público)
+    permission_classes = [AllowAny]
+
     def post(self, request, *args, **kwargs):
         """
         Procesa notificaciones POST de Keepa.
 
-        1. Parsea el payload JSON
+        1. Parsea el payload JSON (request.data ya viene parseado por DRF)
         2. Extrae ASIN, marketplace y tipo de evento
         3. Busca el StoreProduct asociado
         4. Crea registro de KeepaNotification
@@ -52,17 +51,13 @@ class KeepaWebhookView(View):
         6. Retorna 200 OK
 
         Args:
-            request: HttpRequest con el payload JSON en el body
+            request: Request de DRF con el payload JSON en request.data
 
         Returns:
-            JsonResponse con {"status": "ok"} y status code 200
+            Response con {"status": "ok"} y status code 200
         """
-        # Parse JSON payload
-        try:
-            payload = json.loads(request.body.decode('utf-8'))
-        except (json.JSONDecodeError, UnicodeDecodeError):
-            # Si el payload no es JSON válido, usar diccionario vacío
-            payload = {}
+        # DRF ya parsea el JSON automáticamente en request.data
+        payload = request.data if isinstance(request.data, dict) else {}
 
         # Extraer campos del payload (con nombres alternativos para compatibilidad)
         asin = (payload.get('asin') or payload.get('ASIN') or '').strip().upper()
@@ -81,7 +76,7 @@ class KeepaWebhookView(View):
             marketplace=str(domain or ''),
             event_type=str(event_type),
             message='',
-            payload=payload if isinstance(payload, dict) else {},
+            payload=payload,
         )
 
         # Actualizar timestamp de última notificación en el producto
@@ -90,15 +85,4 @@ class KeepaWebhookView(View):
             store_product.save(update_fields=['last_keepa_notification_at'])
 
         # Siempre retornar 200 OK para que Keepa marque como entregado
-        return JsonResponse({'status': 'ok'})
-
-    def http_method_not_allowed(self, request, *args, **kwargs):
-        """
-        Maneja métodos HTTP no permitidos.
-
-        Solo POST está permitido para este webhook.
-
-        Returns:
-            HttpResponseNotAllowed con la lista de métodos permitidos
-        """
-        return HttpResponseNotAllowed(['POST'])
+        return Response({'status': 'ok'}, status=status.HTTP_200_OK)

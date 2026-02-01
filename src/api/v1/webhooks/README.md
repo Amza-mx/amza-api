@@ -12,7 +12,8 @@ Recibe notificaciones push de Keepa API cuando se disparan eventos de tracking c
 
 #### Características
 
-- **Sin Autenticación**: El endpoint es público (decorado con `@csrf_exempt`)
+- **Sin Autenticación**: El endpoint es público (`permission_classes = [AllowAny]`)
+- **Django REST Framework**: Usa `APIView` de DRF
 - **Método**: Solo acepta `POST`
 - **Content-Type**: `application/json`
 - **Respuesta**: Siempre retorna `200 OK` con `{"status": "ok"}`
@@ -94,12 +95,17 @@ curl -X POST https://tu-dominio.com/api/v1/webhooks/keepa \
 2. La URL del webhook es la única "credencial"
 3. Los datos recibidos son informativos y no modifican datos críticos directamente
 
+**Implementación de Seguridad:**
+- Usa `permission_classes = [AllowAny]` de DRF para permitir acceso público
+- Bypasa el middleware de autenticación JWT del proyecto
+- DRF maneja automáticamente el parseo seguro del JSON
+
 ### Recomendaciones
 
 - **HTTPS Obligatorio**: La URL del webhook debe usar HTTPS
-- **Validación de Payload**: El endpoint valida que el JSON sea parseable
+- **Validación de Payload**: DRF valida y parsea el JSON automáticamente en `request.data`
 - **Logging**: Todas las notificaciones se registran en la base de datos
-- **Manejo de Errores**: Los errores de parseo no generan excepciones que puedan exponer información
+- **Manejo de Errores**: DRF maneja errores de parseo de forma segura sin exponer información sensible
 
 ## Monitoreo
 
