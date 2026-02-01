@@ -43,6 +43,10 @@
                             {{ add_form.price_mxn }}
                         </div>
                         <div class="mb-3">
+                            {{ add_form.marketplace.label_tag }}
+                            {{ add_form.marketplace }}
+                        </div>
+                        <div class="mb-3">
                             {{ add_form.tracking_type.label_tag }}
                             {{ add_form.tracking_type }}
                         </div>
@@ -79,6 +83,10 @@
                             <div class="form-text">
                                 Columnas: asin, sku, price_mxn, is_active
                             </div>
+                        </div>
+                        <div class="mb-3">
+                            {{ upload_form.marketplace.label_tag }}
+                            {{ upload_form.marketplace }}
                         </div>
                         <div class="mb-3">
                             {{ upload_form.tracking_type.label_tag }}
