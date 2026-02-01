@@ -99,8 +99,8 @@ class StoreProductListView(LoginRequiredMixin, View):
             if tracking_enabled:
                 try:
                     service = KeepaTrackingService()
-                    webhook_url = request.build_absolute_uri('/api/v1/webhooks/keepa')
-                    service.set_webhook(webhook_url)
+                    # Note: Webhook URL should be configured once using the management command:
+                    # python manage.py setup_keepa_webhook https://yourdomain.com/api/v1/webhooks/keepa
                     response = service.add_tracking(
                         [asin],
                         tracking_type=tracking_type,
@@ -249,8 +249,8 @@ class StoreProductListView(LoginRequiredMixin, View):
             if tracking_enabled and tracked_asins:
                 try:
                     service = KeepaTrackingService()
-                    webhook_url = request.build_absolute_uri('/api/v1/webhooks/keepa')
-                    service.set_webhook(webhook_url)
+                    # Note: Webhook URL should be configured once using the management command:
+                    # python manage.py setup_keepa_webhook https://yourdomain.com/api/v1/webhooks/keepa
                     response = service.add_tracking(
                         tracked_asins,
                         tracking_type=tracking_type,
@@ -287,35 +287,3 @@ class StoreProductListView(LoginRequiredMixin, View):
             return redirect(request.path)
 
         return redirect(request.path)
-
-
-@csrf_exempt
-def keepa_webhook(request):
-    if request.method != 'POST':
-        return HttpResponseNotAllowed(['POST'])
-
-    try:
-        payload = json.loads(request.body.decode('utf-8'))
-    except (json.JSONDecodeError, UnicodeDecodeError):
-        payload = {}
-
-    asin = (payload.get('asin') or payload.get('ASIN') or '').strip().upper()
-    domain = payload.get('domain') or payload.get('domainId') or payload.get('marketplace')
-    event_type = payload.get('type') or payload.get('eventType') or ''
-
-    store_product = StoreProduct.objects.filter(asin=asin).first() if asin else None
-
-    KeepaNotification.objects.create(
-        store_product=store_product,
-        asin=asin,
-        marketplace=str(domain or ''),
-        event_type=str(event_type),
-        message='',
-        payload=payload if isinstance(payload, dict) else {},
-    )
-
-    if store_product:
-        store_product.last_keepa_notification_at = timezone.now()
-        store_product.save(update_fields=['last_keepa_notification_at'])
-
-    return JsonResponse({'status': 'ok'})

@@ -36,7 +36,30 @@ class KeepaTrackingService:
         return response.json()
 
     def set_webhook(self, url: str) -> dict:
+        """
+        Set the webhook URL for push notifications.
+
+        Args:
+            url: Full webhook URL (must be HTTPS and publicly accessible)
+
+        Returns:
+            Keepa API response
+
+        Note:
+            The webhook is GLOBAL for your entire Keepa account.
+            All trackings will send notifications to this URL.
+            You only need to set this once per deployment.
+        """
         return self._post({'type': 'webhook', 'url': url})
+
+    def get_webhook(self) -> dict:
+        """
+        Get current webhook configuration.
+
+        Returns:
+            Keepa API response with webhook information
+        """
+        return self._get({'type': 'webhook'})
 
     def add_tracking(
         self,
