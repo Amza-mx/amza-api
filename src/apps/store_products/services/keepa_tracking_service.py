@@ -6,6 +6,7 @@ from apps.pricing_analysis.models import KeepaConfiguration
 class KeepaTrackingService:
     BASE_URL = 'https://api.keepa.com/tracking'
     DOMAIN_US = 1
+    DOMAIN_MX = 12
     NOTIFICATION_TYPE_API_INDEX = 5
 
     def __init__(self, api_key: str | None = None):
@@ -88,7 +89,7 @@ class KeepaTrackingService:
         Returns:
             Keepa API response with trackings array
         """
-        domain_id = self.DOMAIN_US if marketplace == 'US' else self.DOMAIN_US
+        domain_id = self.DOMAIN_US if marketplace == 'US' else self.DOMAIN_MX
         params = {'type': 'add'}
         if list_name:
             params['list'] = list_name
