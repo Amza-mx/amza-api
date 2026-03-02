@@ -114,24 +114,30 @@ class KeepaTrackingService:
                     'individualNotificationInterval': -1,  # Use default rearm timer
                 }
 
-                # Add tracking criteria based on type and threshold
-                if threshold_value is not None:
-                    # Track specific price threshold
-                    item['thresholdValues'] = [{
-                        'thresholdValue': threshold_value,
+                # thresholdValues is REQUIRED by Keepa API for price notifications.
+                # When no specific threshold is given, use a permissive value
+                # ($999,999 in cents) so any real price triggers the notification.
+                effective_threshold = threshold_value if threshold_value is not None else 99999900
+                item['thresholdValues'] = [{
+                    'thresholdValue': effective_threshold,
+                    'domain': domain_id,
+                    'csvType': csv_type,
+                    'isDrop': is_drop,
+                }]
+
+                # Also monitor stock availability changes
+                item['notifyIf'] = [
+                    {
                         'domain': domain_id,
                         'csvType': csv_type,
-                        'isDrop': is_drop,
-                    }]
-                else:
-                    # Track stock status changes (no specific price threshold)
-                    item['notifyIf'] = [
-                        {
-                            'domain': domain_id,
-                            'csvType': csv_type,
-                            'notifyIfType': 1,  # BACK_IN_STOCK
-                        }
-                    ]
+                        'notifyIfType': 0,  # OUT_OF_STOCK
+                    },
+                    {
+                        'domain': domain_id,
+                        'csvType': csv_type,
+                        'notifyIfType': 1,  # BACK_IN_STOCK
+                    },
+                ]
 
                 # Add metadata for identification
                 item['metaData'] = f'StoreProduct_{asin}_{tracking_type}'
