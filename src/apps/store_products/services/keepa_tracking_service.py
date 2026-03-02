@@ -115,7 +115,7 @@ class KeepaTrackingService:
         update_interval_hours: int = 1,
         list_name: str | None = None,
         threshold_value: int | None = None,
-        csv_type: int = 0,
+        csv_types: list[int] | None = None,
         is_drop: bool = True,
     ) -> dict:
         """
@@ -128,13 +128,17 @@ class KeepaTrackingService:
             update_interval_hours: Update interval (0-25 hours). Lower = more frequent updates.
             list_name: Optional named list for logical separation
             threshold_value: Price threshold in smallest currency unit (cents). None = track all changes.
-            csv_type: Price type to track (0=Amazon, 1=New, 2=Used, etc.)
+            csv_types: Price types to track. Defaults to [1, 0, 18] (New, Amazon, BuyBox).
+                0=Amazon, 1=New, 2=Used, 3=SalesRank, 18=BuyBox, etc.
             is_drop: True to notify on price drops, False for price increases
 
         Returns:
             Keepa API response with trackings array
         """
         domain_id = self.DOMAIN_US if marketplace == 'US' else self.DOMAIN_MX
+        # Default: NEW (any seller), AMAZON (direct), BUY_BOX_SHIPPING
+        effective_csv_types = csv_types if csv_types is not None else [1, 0, 18]
+        effective_threshold = threshold_value if threshold_value is not None else 99999900
         params = {'type': 'add'}
         if list_name:
             params['list'] = list_name
@@ -160,29 +164,24 @@ class KeepaTrackingService:
                 }
 
                 # thresholdValues is REQUIRED by Keepa API for price notifications.
-                # When no specific threshold is given, use a permissive value
-                # ($999,999 in cents) so any real price triggers the notification.
-                effective_threshold = threshold_value if threshold_value is not None else 99999900
-                item['thresholdValues'] = [{
-                    'thresholdValue': effective_threshold,
-                    'domain': domain_id,
-                    'csvType': csv_type,
-                    'isDrop': is_drop,
-                }]
-
-                # Also monitor stock availability changes
-                item['notifyIf'] = [
+                # Track multiple price types to cover direct-sold AND third-party products.
+                item['thresholdValues'] = [
                     {
+                        'thresholdValue': effective_threshold,
                         'domain': domain_id,
-                        'csvType': csv_type,
-                        'notifyIfType': 0,  # OUT_OF_STOCK
-                    },
-                    {
-                        'domain': domain_id,
-                        'csvType': csv_type,
-                        'notifyIfType': 1,  # BACK_IN_STOCK
-                    },
+                        'csvType': ct,
+                        'isDrop': is_drop,
+                    }
+                    for ct in effective_csv_types
                 ]
+
+                # Also monitor stock availability changes for each price type
+                item['notifyIf'] = []
+                for ct in effective_csv_types:
+                    item['notifyIf'].extend([
+                        {'domain': domain_id, 'csvType': ct, 'notifyIfType': 0},  # OUT_OF_STOCK
+                        {'domain': domain_id, 'csvType': ct, 'notifyIfType': 1},  # BACK_IN_STOCK
+                    ])
 
                 # Add metadata for identification
                 item['metaData'] = f'StoreProduct_{asin}_{tracking_type}'
