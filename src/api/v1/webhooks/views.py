@@ -11,6 +11,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from apps.store_products.models import StoreProduct, KeepaNotification
+from apps.store_products.services.notification_processor import process_keepa_notification
 
 
 class KeepaWebhookView(APIView):
@@ -69,6 +70,9 @@ class KeepaWebhookView(APIView):
         if asin:
             store_product = StoreProduct.objects.filter(asin=asin).first()
 
+        # Procesar payload para generar resumen y recomendacion
+        summary, recommendation = process_keepa_notification(payload)
+
         # Crear registro de notificación
         KeepaNotification.objects.create(
             store_product=store_product,
@@ -77,12 +81,24 @@ class KeepaWebhookView(APIView):
             event_type=str(event_type),
             message='',
             payload=payload,
+            summary=summary,
+            recommendation=recommendation,
         )
 
-        # Actualizar timestamp de última notificación en el producto
+        # Actualizar producto: timestamp y disponibilidad segun evento
         if store_product:
+            cause = payload.get('trackingNotificationCause')
+            update_fields = ['last_keepa_notification_at']
             store_product.last_keepa_notification_at = timezone.now()
-            store_product.save(update_fields=['last_keepa_notification_at'])
+
+            if cause == 4:  # OUT_STOCK
+                store_product.keepa_available = False
+                update_fields.append('keepa_available')
+            elif cause == 5:  # IN_STOCK
+                store_product.keepa_available = True
+                update_fields.append('keepa_available')
+
+            store_product.save(update_fields=update_fields)
 
         # Siempre retornar 200 OK para que Keepa marque como entregado
         return Response({'status': 'ok'}, status=status.HTTP_200_OK)

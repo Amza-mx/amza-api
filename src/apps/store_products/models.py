@@ -49,6 +49,8 @@ class KeepaNotification(models.Model):
     event_type = models.CharField(max_length=50, blank=True)
     message = models.TextField(blank=True)
     payload = models.JSONField(default=dict, blank=True)
+    summary = models.CharField(max_length=255, blank=True)
+    recommendation = models.CharField(max_length=255, blank=True)
     is_read = models.BooleanField(default=False)
 
     created_at = models.DateTimeField(auto_now_add=True)

@@ -21,6 +21,6 @@ class StoreProductAdmin(admin.ModelAdmin):
 
 @admin.register(KeepaNotification)
 class KeepaNotificationAdmin(admin.ModelAdmin):
-    list_display = ('asin', 'marketplace', 'event_type', 'is_read', 'created_at')
-    search_fields = ('asin', 'event_type')
+    list_display = ('asin', 'marketplace', 'event_type', 'summary', 'recommendation', 'is_read', 'created_at')
+    search_fields = ('asin', 'event_type', 'summary')
     list_filter = ('marketplace', 'event_type', 'is_read')

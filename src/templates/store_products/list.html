@@ -131,22 +131,24 @@
                             <thead>
                                 <tr>
                                     <th>ASIN</th>
-                                    <th>Marketplace</th>
                                     <th>Evento</th>
+                                    <th>Resumen</th>
+                                    <th>Recomendacion</th>
                                     <th>Fecha</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for notification in notifications %}
-                                    <tr>
+                                    <tr class="{% if 'sin stock' in notification.summary|lower %}table-danger{% elif 'disponible de nuevo' in notification.summary|lower %}table-success{% elif notification.summary %}table-warning{% endif %}">
                                         <td>{{ notification.asin }}</td>
-                                        <td>{{ notification.marketplace }}</td>
                                         <td>{{ notification.event_type }}</td>
+                                        <td>{{ notification.summary }}</td>
+                                        <td><small>{{ notification.recommendation }}</small></td>
                                         <td>{{ notification.created_at|date:"Y-m-d H:i" }}</td>
                                     </tr>
                                 {% empty %}
                                     <tr>
-                                        <td colspan="4" class="text-center text-muted">
+                                        <td colspan="5" class="text-center text-muted">
                                             Sin notificaciones.
                                         </td>
                                     </tr>
