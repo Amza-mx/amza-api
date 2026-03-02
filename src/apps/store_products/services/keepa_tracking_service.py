@@ -1,7 +1,8 @@
 import json
+import time
 import requests
 from django.conf import settings
-from apps.pricing_analysis.models import KeepaConfiguration
+from apps.pricing_analysis.models import KeepaConfiguration, KeepaAPILog
 
 class KeepaTrackingService:
     BASE_URL = 'https://api.keepa.com/tracking'
@@ -18,23 +19,67 @@ class KeepaTrackingService:
             return keepa_configuration.api_key
         return None
 
+    def _log(self, method: str, params: dict, payload, response, elapsed_ms: int, error: str = ''):
+        """Persist request/response to KeepaAPILog for debugging."""
+        safe_params = {k: v for k, v in params.items() if k != 'key'}
+        request_data = {'method': method, 'params': safe_params}
+        if payload is not None:
+            request_data['body'] = payload
+
+        try:
+            response_data = response.json() if response is not None else {}
+        except Exception:
+            response_data = {'raw': response.text[:2000]} if response is not None else {}
+
+        tokens = 0
+        if isinstance(response_data, dict):
+            tokens = response_data.get('tokensConsumed', 0)
+
+        KeepaAPILog.objects.create(
+            endpoint=f'tracking/{safe_params.get("type", "")}',
+            request_params=request_data,
+            response_status=response.status_code if response is not None else None,
+            response_data=response_data,
+            tokens_consumed=tokens,
+            error_message=error,
+            execution_time_ms=elapsed_ms,
+        )
+
     def _post(self, params: dict, payload: list | dict | None = None) -> dict:
         if not self.api_key:
             raise ValueError('Missing KEEPA_API_KEY for Keepa tracking.')
 
         params = {**params, 'key': self.api_key}
-        response = requests.post(self.BASE_URL, params=params, json=payload, timeout=30)
-        response.raise_for_status()
-        return response.json()
+        response = None
+        start = time.monotonic()
+        try:
+            response = requests.post(self.BASE_URL, params=params, json=payload, timeout=30)
+            response.raise_for_status()
+            data = response.json()
+            self._log('POST', params, payload, response, int((time.monotonic() - start) * 1000))
+            return data
+        except Exception as exc:
+            elapsed = int((time.monotonic() - start) * 1000)
+            self._log('POST', params, payload, response, elapsed, error=str(exc))
+            raise
 
     def _get(self, params: dict) -> dict:
         if not self.api_key:
             raise ValueError('Missing KEEPA_API_KEY for Keepa tracking.')
 
         params = {**params, 'key': self.api_key}
-        response = requests.get(self.BASE_URL, params=params, timeout=30)
-        response.raise_for_status()
-        return response.json()
+        response = None
+        start = time.monotonic()
+        try:
+            response = requests.get(self.BASE_URL, params=params, timeout=30)
+            response.raise_for_status()
+            data = response.json()
+            self._log('GET', params, None, response, int((time.monotonic() - start) * 1000))
+            return data
+        except Exception as exc:
+            elapsed = int((time.monotonic() - start) * 1000)
+            self._log('GET', params, None, response, elapsed, error=str(exc))
+            raise
 
     def set_webhook(self, url: str) -> dict:
         """
