@@ -130,6 +130,7 @@
                         <table class="table table-sm table-striped">
                             <thead>
                                 <tr>
+                                    <th></th>
                                     <th>ASIN</th>
                                     <th>Evento</th>
                                     <th>Resumen</th>
@@ -140,6 +141,11 @@
                             <tbody>
                                 {% for notification in notifications %}
                                     <tr class="{% if 'sin stock' in notification.summary|lower %}table-danger{% elif 'disponible de nuevo' in notification.summary|lower %}table-success{% elif notification.summary %}table-warning{% endif %}">
+                                        <td>
+                                            {% if notification.asin %}
+                                                <img src="https://m.media-amazon.com/images/P/{{ notification.asin }}.jpg" alt="{{ notification.asin }}" width="40" height="40" style="object-fit: contain;" loading="lazy" onerror="this.style.display='none'">
+                                            {% endif %}
+                                        </td>
                                         <td>{{ notification.asin }}</td>
                                         <td>{{ notification.event_type }}</td>
                                         <td>{{ notification.summary }}</td>
@@ -148,7 +154,7 @@
                                     </tr>
                                 {% empty %}
                                     <tr>
-                                        <td colspan="5" class="text-center text-muted">
+                                        <td colspan="6" class="text-center text-muted">
                                             Sin notificaciones.
                                         </td>
                                     </tr>
@@ -168,6 +174,7 @@
                         <table class="table table-striped">
                             <thead>
                                 <tr>
+                                    <th></th>
                                     <th>ASIN</th>
                                     <th>SKU</th>
                                     <th>Precio MXN</th>
@@ -180,6 +187,9 @@
                             <tbody>
                                 {% for product in products %}
                                     <tr>
+                                        <td>
+                                            <img src="https://m.media-amazon.com/images/P/{{ product.asin }}.jpg" alt="{{ product.asin }}" width="40" height="40" style="object-fit: contain;" loading="lazy" onerror="this.style.display='none'">
+                                        </td>
                                         <td>{{ product.asin }}</td>
                                         <td>{{ product.sku }}</td>
                                         <td>
@@ -217,7 +227,7 @@
                                     </tr>
                                 {% empty %}
                                     <tr>
-                                        <td colspan="7" class="text-center text-muted">
+                                        <td colspan="8" class="text-center text-muted">
                                             No hay productos cargados.
                                         </td>
                                     </tr>
